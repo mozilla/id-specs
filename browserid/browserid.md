@@ -1,0 +1,4 @@
+BrowserID
+=====
+
+Specification for BrowserID.
