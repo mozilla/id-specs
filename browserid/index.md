@@ -1,7 +1,7 @@
 BrowserID
 =====
 
-This is the production BrowserID specification, working live at <tt>https://browserid.org</tt>.
+This is the <em>development</em> BrowserID specification, working live at https://browserid.org.
 
 Overview
 -
