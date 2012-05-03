@@ -1,12 +1,12 @@
 BrowserID
 =====
 
-This document is in progress and is, in some respects, ahead of the actual BrowserID code. This document will be the single source of truth for BrowserID before 3/15/2012.
+This is the production BrowserID specification, working live at <tt>https://browserid.org</tt>.
 
 Overview
 -
 
-This specification, BrowserID, defines a mechanism for websites to request, from the user via her user-agent, a signed assertion of email-address ownership. Web sites can use this mechanism to register users on their first visit and log them back in on their subsequent visits. The trust path for these assertions of email-address ownership is designed to be federated and decentralized: individual domains can certify their own users. A fallback secondary authentication mechanism is proposed to bootstrap the protocol for domains that do not yet support it.
+This specification, BrowserID, defines a mechanism for websites to request, from the user via her user-agent, a signed assertion of email-address ownership. Web sites can use this mechanism to register users on their first visit and log them back in on subsequent visits. The trust path for these assertions of email-address ownership is federated: individual domains can certify their own users. A fallback identity provider is provided to bootstrap users with email addresses at domains that do not yet support the protocol.
 
 Terms
 -
@@ -15,22 +15,22 @@ Terms
 
 - Public Key: the public portion of an asymmetric cryptographic keypair used in a digital signature algorithm.
 
-- Identity Certificate: a digitally signed statement that binds a given public-key to a given Identity.
+- Identity Certificate: a digitally signed statement that binds a given Public Key to a given Identity.
 
-- Primary Authority: a signer of Identity Certificates for identities that are directly within this authority's domain, e.g. <tt>example.com</tt> certifies <tt>*@example.com</tt>.
+- Identity Provider: a signer of Identity Certificates for identities that are directly within this authority's domain, e.g. <tt>example.com</tt> certifies <tt>*@example.com</tt>.
 
-- Secondary Authority: a signer of Identity Certificates for identities that are ''not'' directly within this authority's domain.
+- Fallback Identity Provider: a signer of Identity Certificates for identities that are ''not'' directly within this authority's domain.
 
 - Audience/Relying Party: a system, typically a web site, that needs to verify an Identity.
 
-- Identity Assertion: a digitally signed statement that a login is requested to a particular relying party.
+- Identity Assertion: a digitally signed statement indicating a request to login to a particular relying party.
 
 - Backed Identity Assertion: an Identity Assertion combined with the requisite Identity Certificates that enable a Relying Party to fully verify the Identity Assertion.
 
 Objects / Messages
 -
 
-BrowserID defines messages using the [http://www.ietf.org/dyn/wg/charter/jose-charter JOSE specifications] for signing JSON-formatted objects.
+BrowserID defines messages using the [JOSE specifications](http://www.ietf.org/dyn/wg/charter/jose-charter) for signing JSON-formatted objects.
 
 ### Public Key ###
 
@@ -47,16 +47,16 @@ For example:
       "e" : "93bc32...",
     }
 
-This data structure should move to [http://tools.ietf.org/html/draft-jones-json-web-key-01 JSON Web Keys].
+This data structure should move to [JSON Web Keys](http://tools.ietf.org/html/draft-jones-json-web-key-01).
 
 ### Identity Certificate ###
 
 An Identity Certificate is a JWT object with the following claims:
 
-* ''exp'' the expiration as per JWT
-* ''iss'' the domain of the issuer as per JWT
-* ''public-key'' the serialized public key as defined above
-* ''principal'' the principal being certified.
+* <tt>exp</tt> the expiration as per JWT
+* <tt>iss</tt> the domain of the issuer as per JWT
+* <tt>public-key</tt> the serialized public key as defined above
+* <tt>principal</tt> the principal being certified.
 
 The principal is a JSON object that indicates the type of principal, e.g.
 
@@ -112,7 +112,12 @@ and a payload of:
 
 ### Backed Identity Assertion ###
 
-A Backed Identity Assertion is a combination of an Identity Assertion and a singe sequence of Identity Certificates that verifiably tie the assertion to an issuing domain. Most often, a backed identity assertion is a single certificate tying a public-key to an Identity, signed by the domain, and an Identity Assertion signed by the just-certified public key.
+A Backed Identity Assertion is a combination of an Identity Assertion
+and a single sequence of Identity Certificates that verifiably tie the
+assertion to an issuing domain. Most often, a backed identity
+assertion is a single certificate tying a public-key to an Identity,
+signed by the domain, and an Identity Assertion signed by the
+just-certified public key.
 
 A Backed Identity Assertion is:
 
@@ -125,7 +130,11 @@ Web-Site Signin Flow
 
 <em>This section is informative.</em>
 
-Consider a web site, <tt>http://example.com</tt>, receiving a visit from a user. This web site wishes to obtain the user's verified email address using BrowserID. The user in question, for the purposes of this description, is Alice. Alice owns two email addresses, <tt>alice@homedomain</tt> and <tt>alice@workdomain</tt>.
+Consider a web site, <tt>http://example.com</tt>, receiving a visit
+from a user. This web site wishes to obtain the user's verified email
+address using BrowserID. The user in question, for the purposes of
+this description, is Alice. Alice owns two email addresses,
+<tt>alice@homedomain</tt> and <tt>alice@workdomain</tt>.
 
 * <tt>example.com</tt> presents a login button with a JavaScript click handler.
 * when Alice clicks the login button, <tt>example.com</tt>'s click handler invokes
