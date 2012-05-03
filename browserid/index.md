@@ -137,11 +137,14 @@ this description, is Alice. Alice owns two email addresses,
 <tt>alice@homedomain</tt> and <tt>alice@workdomain</tt>.
 
 * <tt>example.com</tt> presents a login button with a JavaScript click handler.
-* when Alice clicks the login button, <tt>example.com</tt>'s click handler invokes
- navigator.id.request();
+* when Alice clicks the login button, <tt>example.com</tt>'s click handler invokes:
+<pre>
+  navigator.id.get(gotAssertion);
+</pre>
+where <tt>gotAssertion</tt> is a callback function.
 * Alice is presented with a user-agent dialog that lets her select which email to present to <tt>example.com</tt>.
-* If Alice chooses to cancel the transaction, a <tt>logincanceled</tt> event is fired on the <tt>navigator.id</tt> object, which <tt>example.com</tt> can choose to listen for.
-* If Alice chooses to authenticate using one of her email addresses, a <tt>login</tt> event is fired on the <tt>navigator.id</tt> object, which <tt>example.com</tt> should listen for. The event's <tt>assertion</tt> property is filled with a Backed Identity Assertion.
+* If Alice chooses to cancel the transaction, <tt>gotAssertion</tt> is invoked with a null argument.
+* If Alice chooses to authenticate using one of her email addresses, <tt>gotAssertion</tt> is invoked with a Backed Identity Assertion.
 * <tt>example.com</tt> should take this assertion and pass it back to its server. This can be accomplished with an AJAX request. For example, using jQuery:
 
 <pre>
@@ -150,7 +153,7 @@ this description, is Alice. Alice owns two email addresses,
      }
 </pre>
 
-This assertion is a Backed Identity Assertion, as defined above. We call it ''assertion'' here for simplicity, since the Relying Party typically need only pass this assertion to a verifier service without worrying about the specific assertion contents.
+This assertion is a Backed Identity Assertion, as defined above. We call it <tt>assertion</tt> here for simplicity, since the Relying Party typically need only pass this assertion to a verifier service without worrying about the specific semantics of the assertion string.
 
 Identity Provisioning Flow
 --
@@ -223,26 +226,20 @@ A compliant BrowserID User-Agent must implement the <tt>navigator.id</tt> object
 
 The User Agent MUST offer the following API call:
 
-<tt>navigator.id.request(object options);</tt>
+<tt>navigator.id.get(object callback, object options);</tt>
 
-The Relying Party MAY call the navigator.id.request method when it wishes to request that the User Agent generate an identity assertion as soon as it can. When this happens, the User Agent SHOULD pursue the following actions:
+The Relying Party MAY call the <tt>navigator.id.get</tt> method when it wishes to request that the User Agent generate an identity assertion as soon as it can. When this happens, the User Agent SHOULD pursue the following actions:
 
 1. Establish the origin of the requesting site (including scheme and non-standard port).
 1. Check local BrowserID store for known identities that have been successfully used previously.
 1. Present the list of known identities. The User Agent MAY suggest a preferred identity out of that list based on heuristics or other internal state, e.g. the email last used on that site.
 1. When the user selects an Identity:
  - check that the associated certificate is still valid. If not, initiate a provisioning workflow for that Identity, then continue once it returns successfully.
- - generate an Identity Assertion using the requesting site's origin as audience and the current time. Bundle with the associated certificate to create a Backed Identity Assertion, and fire a <tt>login</tt> event on the <tt>navigator.id</tt> object with a serialization of the Backed Identity Assertion in the <tt>assertion</tt> field of the event, then terminate the login workflow.
+ - generate an Identity Assertion using the requesting site's origin as audience and the current time. Bundle with the associated certificate to create a Backed Identity Assertion, and invoke the <tt>callback</tt> with, as first and only parameter, a serialization of the Backed Identity Assertion, then terminate the login workflow.
 1. If no Identities are known, or if the user wishes to use a new Identity, the User Agent should prompt the user for this new identity and use it to initiate a Provisioning workflow (see below). Once provisioning has completed, the User Agent SHOULD present the updated list of identities to the user.
-1. If, at any point, the user cancels the login process, fire a <tt>logincanceled</tt> event on the <tt>navigator.id</tt> object and terminate the login workflow.
+1. If, at any point, the user cancels the login process, the User Agent SHOULD invoke the <tt>callback</tt> with a single null argument and terminate the login workflow.
 
-By the end of the process, the User Agent MUST fire one of two events on the <tt>navigator.id</tt> object:
-
-* A <tt>loginCancelled</tt> event if the user chose not to log in.
-
-* A <tt>login</tt> event if the user chose to log in. This event MUST include the Backed Identity Assertion in the <tt>assertion</tt> property.
-
-XXX: should we provide error information if it's not just a user cancel?
+By the end of the process, the User Agent MUST invoke the <tt>callback</tt> with either a Backed Identity Assertion or null as first parameter.
 
 ### Provisioning ###
 
