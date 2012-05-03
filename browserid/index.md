@@ -160,8 +160,8 @@ Consider Alice, a user of <tt>EyeDee.me</tt>, with email address <tt>alice@eyede
 * Alice visits <tt>example.com</tt> and clicks "login."
 * In the BrowserID interface, Alice types her email address <tt>alice@eyedee.me</tt>.
 * The user-agent checks <tt>https://eyedee.me/.well-known/browserid</tt> and determines that <tt>eyedee.me</tt> supports BrowserID. From this configuration file it determines the provisioning and authentication URLs.
-* The user-agent loads, in an invisible IFRAME, the provisioning URL <tt>https://eyedee.me/browserid/provision.html</tt>, delivering to that URL any cookies that have previously been set.
-* The provisioning URL communicates with its server to determine if Alice is properly authenticated and, if so, triggers key generation within the user agent, obtains the public key, signs it, and registers the resulting certificate with the user agent:
+* The user-agent loads, in an invisible IFRAME, the provisioning URL <tt>https://eyedee.me/browserid/provision.html</tt>, delivering to that URL any cookies that have previously been set and making available to that page's JavaScript any <tt>localStorage</tt> that corresponds to the <tt>eyedee.me</tt> origin.
+* The provisioning URL's script determines if Alice is properly authenticated and, if so, triggers key generation within the user agent, obtains the public key, signs it, and registers the resulting certificate with the user agent:
 
 <pre>
  // get parameters of provisioning
