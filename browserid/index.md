@@ -343,7 +343,7 @@ A BrowserID support document MUST be a well-formed JSON document with at least t
 
 The value of the <tt>public-key</tt> field MUST be a Public Key serialized as a JSON object, as defined above.
 
-The value of the <tt>authentication</tt> field MUST be a relative reference to a URI, as defined by [https://tools.ietf.org/html/rfc3986 RFC3986].
+The value of the <tt>authentication</tt> field MUST be a relative reference to a URI, as defined by [RFC3986](https://tools.ietf.org/html/rfc3986).
 
 The value of the <tt>provisioning</tt> field MUST also be a relative reference to a URI.
 
@@ -353,7 +353,7 @@ A BrowserID delegated-support document MUST be a well-formed JSON document with 
 
 ### Declaring Support and Parameters for BrowserID ###
 
-To declare support for BrowserID, a domain MUST publish either a BrowserID support document OR a BrowserID delegated-support document at a specific URI relative to the domain's SSL URI. The relative reference URI for this document is <tt>/.well-known/browserid</tt>, as per [https://tools.ietf.org/html/rfc5785 RFC5785]. The domain MAY choose to reference this BrowserID support document from a host-meta file (as per RFC5785).
+To declare support for BrowserID, a domain MUST publish either a BrowserID support document OR a BrowserID delegated-support document at a specific URI relative to the domain's SSL URI. The relative reference URI for this document is <tt>/.well-known/browserid</tt>, as per [RFC5785](https://tools.ietf.org/html/rfc5785). The domain MAY choose to reference this BrowserID support document from a host-meta file (as per RFC5785).
 
 The BrowserID support document (or delegated-support document) MUST be served with Content-Type <tt>application/json</tt>.
 
@@ -429,5 +429,5 @@ things to write about:
 References
 --
 
-* JWT: [http://self-issued.info/docs/draft-jones-json-web-token-04.html http://self-issued.info/docs/draft-jones-json-web-token-04.html]
-* JWK: [http://self-issued.info/docs/draft-jones-json-web-key.html http://self-issued.info/docs/draft-jones-json-web-key.html]
+* JWT: http://self-issued.info/docs/draft-jones-json-web-token-04.html
+* JWK: http://self-issued.info/docs/draft-jones-json-web-key.html
