@@ -360,13 +360,15 @@ The BrowserID support document (or delegated-support document) MAY be served wit
 
 A BrowserID-compliant domain MUST provide a user-authentication web flow starting at the URI referenced by the <tt>authentication</tt> field in its published BrowserID support document. The specifics of the user-authentication flow are up to the domain. The flow MAY use redirects to other pages, even other domains, to complete the user authentication process. The flow SHOULD NOT use <tt>window.open()</tt> or other techniques that target new windows/tabs.
 
+The domain MAY serve this authentication workflow using anti-framing directives (e.g. <tt>X-FRAMES-OPTION</tt>).
+
 The authentication flow MUST complete at a URI relative to the BrowserID-compliant domain. The completion page content MUST include a JavaScript call to either <tt>navigator.id.completeAuthentication()</tt> if authentication was successful or <tt>navigator.id.raiseAuthenticationFailure()</tt> if the use cancelled authentication.
 
 ### Certifying Users ###
 
-A BrowserID-compliant domain MUST provider user-key-certification at the URI referenced by the <tt>provisioning</tt> field in its published BrowserID support document.
+A BrowserID-compliant domain MUST provide user-key certification at the URI referenced by the <tt>provisioning</tt> field in its published BrowserID support document.
 
-The domain SHOULD deliver HTML and JavaScript at that URI, which it can expect to be evaluated in a standard user-agent IFRAME.
+The domain SHOULD deliver, at that URI, an HTML document with either embedded or reference JavaScript, which it can expect to be evaluated in a standard user-agent frame. The domain SHOULD NOT use anti-framing directives (e.g. <tt>X-FRAMES-OPTION</tt>) when that URI is requested.
 
 The domain SHOULD determine, without any user-facing content, the user's state of authentication with the domain. The domain MAY use cookies or localStorage to make this determination.
 
@@ -374,13 +376,13 @@ The domain MUST call, in JavaScript:
 <pre>
 navigator.id.beginProvisioning(provisionEmailFunction);
 </pre>
-with <tt>provisionEmailFunction</tt> a function that accepts an email address as parameter.
+with <tt>provisionEmailFunction</tt> a function that accepts an email address and a duration (in integral seconds) as parameter.
 
-Once the email address determined, the domain SHOULD check that the user is properly authenticated to use this email address. If she isn't, the domain SHOULD call
+Once the requested email provided as parameter to the <tt>provisionEmailFunction</tt>, the domain SHOULD check that the user is properly authenticated to use this email address. If she isn't, the domain SHOULD call:
 <pre>
  navigator.id.raiseProvisioningFailure(explanation)
 </pre>
-with <tt>explanation</tt> a string explaining the failure. The domain SHOULD concludes all JavaScript activity after making this call.
+with <tt>explanation</tt> a string explaining the failure. The domain SHOULD conclude all JavaScript activity after making this call.
 
 You SHOULD use one of the following <tt>explanation</tt> codes:
 * <tt>user is not authenticated as target user</tt> - Indicates UA should show sign in screen again, due to an error
@@ -389,9 +391,9 @@ If the user is properly authenticated, the domain MUST call:
 <pre>
  navigator.id.genKeyPair(gotPublicKey);
 </pre>
-with <tt>gotPublicKey</tt> a function that accepts a JWK-string-formatted public-key.
+with <tt>gotPublicKey</tt> a function that accepts a public-key JSON object.
 
-The domain's JavaScript SHOULD then send this JWK string to the domain's backend server. The domain's backend server SHOULD certify this key along with the email address provided to its <tt>provisionEmailFunction</tt> function, and an expiration date at least 1 minutes in the future. The backend server SHOULD NOT issue a certificate valid longer than 24 hours. The domain's backend server SHOULD then deliver an Identity Certificate back to its JavaScript context. The domain's JavaScript MUST finally call:
+The domain's JavaScript SHOULD send this public-key to the domain's backend server. The domain's backend server SHOULD certify this key along with the email address provided to its <tt>provisionEmailFunction</tt> function, and an expiration date at least 1 minute in the future. The backend server MUST NOT issue a certificate valid longer than 24 hours. The backend server SHOULD NOT issue a certificate valid longer than the duration passed to the <tt>provisionEmailFunction</tt> earlier. The domain's backend server SHOULD deliver the generated Identity Certificate back to its JavaScript context. The domain's JavaScript MUST finally call:
 <pre>
  navigator.id.registerCertificate(certificate);
 </pre>
@@ -411,7 +413,7 @@ To verify a Backed Identity Assertion, a Relying Party SHOULD perform the follow
 1. If the first certificate (or only certificate when there is only one) is not properly signed by the expected issuer's public key, reject the assertion. The expected issuer is either the domain of the certified email address in the last certificate, or the issuer listed in the first certificate if the email-address domain does not support BrowserID.
 1. If the expected issuer was designated by the certificate rather than discovered given the user's email address, then the issuer SHOULD be <tt>browserid.org</tt>, otherwise reject the assertion.
 
-Note that a relying party may, at its discretion, use a verification service that performs these steps and returns a summary of results.  In that case, the verification service MUST perform all the checks described here.  In order to perform audience checking, the verification service must be told what audience to expect by the relying party.
+A relying party MAY use a verification service that performs these steps and returns a summary of results.  In that case, the verification service MUST perform all the checks described here.  In order to perform audience checking, the verification service SHOULD require that the relying party indicate the expected value of the <tt>audience</tt> parameter.
 
 Security Considerations
 -
