@@ -181,11 +181,11 @@ Consider Alice, a user of <tt>EyeDee.me</tt>, with email address <tt>alice@eyede
 
         // ... interact with the server to sign the public key and get
         // a certificate ...
-        var cert = someServerInteraction();
-
-        // pass the certificate back to BrowserID and complete the
-        // provisioining process
-        navigator.id.registerCertificate(cert);
+        someServerInteraction(function(cert){
+            // pass the certificate back to BrowserID and complete the
+            // provisioining process
+            navigator.id.registerCertificate(cert);
+        });
     });
  });
 </pre>
