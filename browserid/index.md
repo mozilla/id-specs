@@ -1,7 +1,7 @@
 BrowserID
 =====
 
-This is the <em>development</em> BrowserID specification, working live at https://browserid.org.
+This is the <em>development</em> BrowserID specification, working live at https://dev.diresworb.org.
 
 Overview
 -
@@ -112,12 +112,7 @@ and a payload of:
 
 ### Backed Identity Assertion ###
 
-A Backed Identity Assertion is a combination of an Identity Assertion
-and a single sequence of Identity Certificates that verifiably tie the
-assertion to an issuing domain. Most often, a backed identity
-assertion is a single certificate tying a public-key to an Identity,
-signed by the domain, and an Identity Assertion signed by the
-just-certified public key.
+A Backed Identity Assertion is a combination of an Identity Assertion and a single sequence of Identity Certificates that verifiably tie the assertion to an issuing domain. Most often, a backed identity assertion is a single certificate tying a public-key to an Identity, signed by the domain, and an Identity Assertion signed by the just-certified public key.
 
 A Backed Identity Assertion is:
 
@@ -130,32 +125,107 @@ Web-Site Signin Flow
 
 <em>This section is informative.</em>
 
-Consider a web site, <tt>http://example.com</tt>, receiving a visit
-from a user. This web site wishes to obtain the user's verified email
-address using BrowserID. The user in question, for the purposes of
-this description, is Alice. Alice owns two email addresses,
-<tt>alice@homedomain</tt> and <tt>alice@workdomain</tt>.
+The BrowserID JavaScript API can be used by web sites to implement
+authentication. Implementing BrowserID support consists of:
 
-* <tt>example.com</tt> presents a login button with a JavaScript click handler.
-* when Alice clicks the login button, <tt>example.com</tt>'s click handler invokes
- navigator.id.request();
-* Alice is presented with a user-agent dialog that lets her select which email to present to <tt>example.com</tt>.
-* If Alice chooses to cancel the transaction, a <tt>logincanceled</tt> event is fired on the <tt>navigator.id</tt> object, which <tt>example.com</tt> can choose to listen for.
-* If Alice chooses to authenticate using one of her email addresses, a <tt>login</tt> event is fired on the <tt>navigator.id</tt> object, which <tt>example.com</tt> should listen for. The event's <tt>assertion</tt> property is filled with a Backed Identity Assertion.
-* <tt>example.com</tt> should take this assertion and pass it back to its server. This can be accomplished with an AJAX request. For example, using jQuery:
+  1. registering callback functions that will be invoked when the user logs in or out
+     via `navigator.id.watch()`
+  2. invoking `navigator.id.request()` when the user clicks a login button on your site.
+  3. invoking `navigator.id.logout()` when the user clicks a logout button on your site.
 
-<pre>
-     function gotAssertion(assertion) {
-       $.post("/verifyAssertion", {assertion: assertion}, afterVerifyAssertion);
-     }
-</pre>
+### Key Ideas
 
-This assertion is a Backed Identity Assertion, as defined above. We call it ''assertion'' here for simplicity, since the Relying Party typically need only pass this assertion to a verifier service without worrying about the specific assertion contents.
+Typically on the web, login sessions are implemented with cookies and are completely managed by a website.  With BrowserID you can continue to implement sessions as you do today, but must take a couple extra steps to synchronize your session with BrowserID.  Specifically, you should handle the case where the user logs in or out via BrowserID, while your page is not loaded.
+
+**Watching Login State**: The `navigator.id.watch()` function allows you to register javascript functions that will be invoked when users log in or out, which may occur while they're visiting your website, or while it's not even loaded. Each page of your site should call `navigator.id.watch()` and be prepared to handle asynchronous changes to login state.
+
+**Telling BrowserID who is logged in**: An important parameter to `navigator.id.watch()` is `loggedInEmail`. When supplied, this parameter tells BrowserID whether the current page load is associated with a logged in user.  By supplying this parameter, you can speed up your page load by suppressing unnecessary callbacks (and using less CPU and network resources):
+
+  * If you supply `null`, and no user is logged in according to BrowserID, your `onlogout`
+    callback will not be invoked.
+  * If you supply an email address and that user is still logged in
+    via BrowserID, your `onlogin` callback will not be invoked.
+
+### Example Code
+
+    /* get the email address of currently logged in user from your server */
+    var emailAddressOfCurrentlyLoggedInUser = ...;
+
+    navigator.id.watch({
+      loggedInEmail: emailAddressOfCurrentlyLoggedInUser,
+      onlogin: function(assertion) {
+        // a user has logged in!  now verify the assertion on your server, create a session,
+        // and update your UI
+      },
+      onlogout: function() {
+        // a user has logged out!  make a call to your server or redirect the user
+        // to tear down the session
+      },
+      onready: function() {
+        // this is called *after* onlogin or onlogout, so you can display the login state
+        // and user-specific information.
+      }
+    });
+
+    // now let's set up code that will run when the user clicks on the login button
+    var loginButton = document.querySelector("#loginbutton");
+    loginButton.onclick = function() {
+      navigator.id.request()
+    };
+
+    // and set up code that will run when the user clicks on the logout button
+    var logoutButton = document.querySelector("#logoutbutton");
+    logoutButton.onclick = function() {
+      navigator.id.logout(); // this will cause `onlogout` to be invoked.
+    };
+
+### API
+
+#### navigator.id.watch(&lt;options&gt;);
+
+Register callbacks to be notified when the user logs in or out.  The option block has the following properties:
+
+  * `loggedInEmail` *(optional)* - The email address of the currently logged
+    in user.  May be a string (email address), or `null` (indicating
+    no user is logged in).  If provided, the `onlogin` or `onlogout`
+    callbacks will not be invoked if the users' login state is
+    consistent with the value provided.  If omitted or `undefined`,
+    one of the two callbacks will be invoked on every page load.
+  * `onlogin` *(required)* - A callback that will be invoked and
+    passed a single argument, an assertion, when the user logs in.
+  * `onlogout` *(required)* - A callback that will be invoked when
+    the user logs out.
+  * `onready` *(optional)* - A callback that will always be called
+    once the navigator.id service is initialized (after `onlogin` or
+    `onlogout` have been called).  By waiting to display UI until this
+    point, you can avoid UI flicker in the case where your session is out
+    of sync with BrowserID.
+
+#### navigator.id.request(&lt;options&gt;);
+
+Request an identity from the user.  This will cause a dialog to be opened to prompt the user for an email address to use to log into the site.  This function must be invoked from within a click handler.  The argument is an options block which may contain the following properties:
+
+  * `requiredEmail` *(optional)* - An email address that the user must
+    use to log in.  When provided, the user may not select a different
+    address, but may cancel the sign-in.
+  * `privacyURL` - URL to site's privacy policy.  When provided, a link
+    will be displayed in the sign-in dialog.
+  * `tosURL` - URL to site's terms of service.  When provided, a link will
+    be displayed in the sign-in dialog.
+  * `oncancel` - a callback that will be invoked if the user refuses to
+    share an identity with the site.
+
+#### navigator.id.logout([callback]);
+
+A function that should be invoked when a user wishes to logout of the current site (for instance, when clicking on an in-content logout button).  Will cause the `onlogout` callback passed to `navigator.id.watch()` to be invoked.
+
 
 Identity Provisioning Flow
 --
 
-Consider Alice, a user of <tt>EyeDee.me</tt>, with email address <tt>alice@eyedee.me</tt>. Alice wishes to user her <tt>alice@eyedee.me</tt> identity to log into web sites that support the BrowserID protocol:
+<em>This section is informative</em>
+
+Consider Alice, a user of <tt>EyeDee.me</tt>, with email address <tt>alice@eyedee.me</tt>. Alice wishes to use her <tt>alice@eyedee.me</tt> identity to log into web sites that support the BrowserID protocol:
 
 * Alice visits <tt>example.com</tt> and clicks "login."
 * In the BrowserID interface, Alice types her email address <tt>alice@eyedee.me</tt>.
@@ -207,6 +277,7 @@ Consider Alice, a user of <tt>EyeDee.me</tt>, with email address <tt>alice@eyede
 </pre>
 
 Once this is successfully completed, the user-agent returns to the BrowserID user-interface, and attempts to load the provisioning URL as in the previous step.
+
 * Once a certificate for <tt>alice@eyedee.me</tt> is installed, the user-agent completes the login to <tt>example.com</tt> by creating an assertion and delivering it to <tt>example.com</tt> as in the Main Protocol Flow above.
 
 By the end of this flow, Alice has obtained, within her user-agent, a certificate for her email address issued directly by her email address's domain.
@@ -215,36 +286,16 @@ User-Agent Compliance
 --
 <em>This section is normative.</em>
 
-The User-Agent plays an important role in BrowserID support. Here, we define, normatively, the API that user agents MUST implement, including specific behaviors in response to these API calls. Relying Parties and Identity Providers can safely skip this section.
+The User-Agent plays an important role in BrowserID support. We define, normatively, the API and behaviors of a conforming BrowserID-enabled user agent. Relying Parties and Identity Providers can safely skip this section.
 
-A compliant BrowserID User-Agent must implement the <tt>navigator.id</tt> object, which serves both for issuing assertions and exposing a provisioning flow to identity providers.
+A compliant BrowserID User-Agent MUST implement:
 
-### Issuing Assertions ###
+* IdP provisioning
+* login-state tracking
+* Generation of Identity-Backed Assertions
+* RP authentication
 
-The User Agent MUST offer the following API call:
-
-<tt>navigator.id.request(object options);</tt>
-
-The Relying Party MAY call the navigator.id.request method when it wishes to request that the User Agent generate an identity assertion as soon as it can. When this happens, the User Agent SHOULD pursue the following actions:
-
-1. Establish the origin of the requesting site (including scheme and non-standard port).
-1. Check local BrowserID store for known identities that have been successfully used previously.
-1. Present the list of known identities. The User Agent MAY suggest a preferred identity out of that list based on heuristics or other internal state, e.g. the email last used on that site.
-1. When the user selects an Identity:
- - check that the associated certificate is still valid. If not, initiate a provisioning workflow for that Identity, then continue once it returns successfully.
- - generate an Identity Assertion using the requesting site's origin as audience and the current time. Bundle with the associated certificate to create a Backed Identity Assertion, and fire a <tt>login</tt> event on the <tt>navigator.id</tt> object with a serialization of the Backed Identity Assertion in the <tt>assertion</tt> field of the event, then terminate the login workflow.
-1. If no Identities are known, or if the user wishes to use a new Identity, the User Agent should prompt the user for this new identity and use it to initiate a Provisioning workflow (see below). Once provisioning has completed, the User Agent SHOULD present the updated list of identities to the user.
-1. If, at any point, the user cancels the login process, fire a <tt>logincanceled</tt> event on the <tt>navigator.id</tt> object and terminate the login workflow.
-
-By the end of the process, the User Agent MUST fire one of two events on the <tt>navigator.id</tt> object:
-
-* A <tt>loginCancelled</tt> event if the user chose not to log in.
-
-* A <tt>login</tt> event if the user chose to log in. This event MUST include the Backed Identity Assertion in the <tt>assertion</tt> property.
-
-XXX: should we provide error information if it's not just a user cancel?
-
-### Provisioning ###
+### IdP Provisioning ###
 
 The User Agent should support a provisioning workflow when a user wants to authenticate with a new email address. A provisioning workflow is initiated with some context:
 
@@ -280,20 +331,7 @@ If the context indicates that the authentication workflow has already been invok
 
 If the context indicates that the authentication workflow has NOT already been invoked, then the User Agent SHOULD begin the Authentication Workflow (described below).
 
-#### WebIDL ####
-
-<pre>
- module navigator {
-     module id {
-         void beginProvisioning(object callback);
-         void genKeyPair(string email, object callback);
-         void registerCertificate(string certificate);
-         void raiseProvisioningFailure(string reason);
-     }
- };
-</pre>
-
-### Authenticating ###
+#### Authenticating ####
 
 The User Agent MUST support an authentication workflow when a user wants to certify a new email address but has failed the provisioning workflow. An authentication workflow is initiated with some context:
 
@@ -320,12 +358,75 @@ When this function is invoked, the User Agent MUST return to its provisioning wo
 <pre>
  module navigator {
      module id {
+         void beginProvisioning(object callback);
+         void genKeyPair(string email, object callback);
+         void registerCertificate(string certificate);
+         void raiseProvisioningFailure(string reason);
+
          void beginAuthentication(object callback);
          void completeAuthentication();
          void raiseAuthenticationFailure(string reason);
      }
  };
 </pre>
+
+
+### Tracking User State ###
+
+The User Agent MUST track the user's login state at various Web Origins, based on decisions the user made in the context of BrowserID-mediated logins, so that the following information is available to the User Agent when making decisions:
+
+* `HISTORY(origin).loggedIn` is `true` if the user should currently be logged into `origin`.
+* `HISTORY(origin).id` is the last ID used to log into `origin`, or `undefined`.
+* `HISTORY(origin).lastLogin` is a `Date` of the last time the user logged into the origin, or `undefined` if never.
+
+Note that the above data is denoted programmatically to make this specification easier to read. The data <em>MUST NOT</em> be available to web content.
+
+### Generating Identity-Backed Assertions ###
+
+When
+
+### RP Authentication ###
+
+The User Agent MUST offer the following APIs and behave as described in response to these calls.
+
+#### navigator.id.watch(object params);
+
+The User Agent SHOULD throw an exception immediately UNLESS `params` includes the following parameters:
+
+1. `onlogin`: a function
+1. `onlogout`: a function
+
+If `params` includes the above required parameters, the User Agent SHOULD store the entire `params` object scoped to the `document`, including the above callbacks and any additional fields. If the `document` DOM object disappears for any reason (unloading, closing, etc.), these callbacks should be garbage-collected.
+
+If `params.loggedInEmail` is `undefined`, the User Agent SHOULD:
+
+* if `HISTORY(origin).loggedIn`, invoke `onlogin` callback for the identity `HISTORY(origin).id` (see
+othe fire either the `onlogin` or `onlogout`
+The User Agent SHOULD determine whether `params.loggedInEmail` matches the User Agent's login state for the `document.location.origin`.
+
+If
+
+#### navigator.id.request(object options);
+
+The Relying Party MAY call the navigator.id.request method when it wishes to request that the User Agent generate an identity assertion as soon as it can. When this happens, the User Agent SHOULD pursue the following actions:
+
+1. Establish the origin of the requesting site (including scheme and non-standard port).
+1. Check local BrowserID store for known identities that have been successfully used previously.
+1. Present the list of known identities. The User Agent MAY suggest a preferred identity out of that list based on heuristics or other internal state, e.g. the email last used on that site.
+1. When the user selects an Identity:
+ - check that the associated certificate is still valid. If not, initiate a provisioning workflow for that Identity, then continue once it returns successfully.
+ - generate an Identity Assertion using the requesting site's origin as audience and the current time. Bundle with the associated certificate to create a Backed Identity Assertion, and fire a <tt>login</tt> event on the <tt>navigator.id</tt> object with a serialization of the Backed Identity Assertion in the <tt>assertion</tt> field of the event, then terminate the login workflow.
+1. If no Identities are known, or if the user wishes to use a new Identity, the User Agent should prompt the user for this new identity and use it to initiate a Provisioning workflow (see below). Once provisioning has completed, the User Agent SHOULD present the updated list of identities to the user.
+1. If, at any point, the user cancels the login process, fire a <tt>logincanceled</tt> event on the <tt>navigator.id</tt> object and terminate the login workflow.
+
+By the end of the process, the User Agent MUST fire one of two events on the <tt>navigator.id</tt> object:
+
+* A <tt>loginCancelled</tt> event if the user chose not to log in.
+
+* A <tt>login</tt> event if the user chose to log in. This event MUST include the Backed Identity Assertion in the <tt>assertion</tt> property.
+
+XXX: should we provide error information if it's not just a user cancel?
+
 
 Primary Authority Compliance
 --
