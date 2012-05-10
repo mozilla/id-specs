@@ -120,6 +120,38 @@ A Backed Identity Assertion is:
 
 where each cert and the identity assertion are base64url-encoded data structures, as defined above.
 
+### BrowserID Support Document ###
+
+A BrowserID support document MUST be a well-formed JSON document with at least these three fields: <tt>public-key</tt>, <tt>authentication</tt>, and <tt>provisioning</tt>. The document MAY contain additional JSON fields.
+
+The value of the <tt>public-key</tt> field MUST be a Public Key serialized as a JSON object, as defined above.
+
+The value of the <tt>authentication</tt> field MUST be a relative reference to a URI, as defined by [RFC3986](https://tools.ietf.org/html/rfc3986).
+
+The value of the <tt>provisioning</tt> field MUST also be a relative reference to a URI.
+
+For example:
+
+     {
+        "public-key": {
+            "algorithm": "RS",
+            "n": "1549887475809027603946509410....",
+            "e": "65537"},
+        "authentication": "/browserid/sign_in.html",
+        "provisioning": "/browserid/provision.html"
+     }
+
+#### BrowserID Delegated Support Document ####
+
+A BrowserID delegated-support document MUST be a well-formed JSON document with at least one field: <tt>authority</tt>. This field MUST be a domain name.
+
+For example:
+
+     {
+        "authority": "otherexample.com"
+     }
+
+
 Web-Site Signin Flow
 --
 
@@ -290,68 +322,124 @@ The User-Agent plays an important role in BrowserID support. We define, normativ
 
 A compliant BrowserID User-Agent MUST implement:
 
-* IdP provisioning
-* login-state tracking
+* Keypair and Certificate Storage
+* IdP Determination
+* IdP Provisioning
+* IdP Authentication
+* Login-state Tracking
 * Generation of Identity-Backed Assertions
-* RP authentication
+* RP Authentication
+
+### Keypair and Certificate Storage ###
+
+The User Agent MUST implement an internal store of keypairs and associated certificates. We denote `CERTS(identity)` for ease of specification. Its value is either `undefined` or an object with properties:
+
+* `cert`, a JSON Certificate as defined above,
+* `publicKey`, a JSON Public Key as defined above, matching the public key in `cert`,
+* `secretKeyIdentifier`, an identifier for the corresponding secret key.
+
+The User Agent MAY implement this keypair and certificate storage in a different manner, with a different interface. The User Agent SHOULD be careful to disclose the actual secret key in very few settings.
+
+### IdP Determination ###
+
+The User Agent MUST be able to determine an IdP, designated by a domain name, for a given Identity. The User Agent MUST follow these steps:
+
+* for the given Identity, e.g. `alice@example.com`, determine the domain portion of the identifier, e.g. `example.com`
+* look up the BrowserID configuration at `https://<DOMAIN>/.well-known/browserid`, e.g. in this case `https://example.com/.well-known/browserid`. If this lookup fails, use the Fallback IdP.
+* parse the BrowserID configuration file as a JSON object.
+* if the configuration is a proper BrowserID Support document, then store the JSON object as `IDP(identity)` for the requested Identity, with `provisioning` and `authentication` resolved as URLs relative to `https://<domain>`
+* if the configuration is a proper BrowserID Delegated Support document, then proceed recursively with the configuration lookup process for the delegated domain, i.e. the value of the `authority` parameter.
+* otherwise, fail and use the Fallback IdP.
+
+#### Fallback IdP ####
+
+The User Agent SHOULD use `browserid.org` as the IdP when IdP Determination proceeds in Fallback Mode.
 
 ### IdP Provisioning ###
 
-The User Agent should support a provisioning workflow when a user wants to authenticate with a new email address. A provisioning workflow is initiated with some context:
+The User Agent MUST support a provisioning workflow when a user wants to authenticate with a new email address. A provisioning workflow is initiated with some context:
 
-* the email address being provisioned
-* information about the security status of the session (user's own computer, shared computer, public computer, ...)
-* whether the authentication workflow has been invoked yet (initially <tt>false</tt>).
+* the identity address being provisioned, e.g. `alice@example.com`
+* security level of the session (user's own computer, shared computer, public computer, ...)
+* whether the authentication workflow has been invoked yet for this provisioning workflow (initially <tt>false</tt>).
 
-During a provisioning action, the User Agent MUST support the following API calls:
+We denote these `CONTEXT.identity`, `CONTEXT.securityLevel`, and `CONTEXT.authenticationDone`.
 
-<tt>navigator.id.beginProvisioning(object callback)</tt>
+The User Agent MUST determine a new context value, `CONTEXT.certValidityDuration`, an integer indicating the recommended validity of a certificate, measured in seconds and based on `CONTEXT.securityLevel`. This determination MAY be made in any way the User Agent deems useful. This value MUST NOT be longer than 24 hours.
 
-The User Agent SHOULD expect the callback function to accept parameters <tt>email</tt> and <tt>cert_duration_s</tt>.
+The User Agent MUST proceed as follows:
 
-In response to this call, the User Agent should invoke the callback with parameters based on the provisioning context. The <tt>email</tt> parameter MUST be the email address which the user-agent is attempting to provision. The <tt>cert_duration_s</tt> parameter should be the requested validity duration for the certificate, which the User Agent SHOULD determine based on the security level of the session. For example, public computers should have very short certificate validity.
+* determine `IDP(identity)`, e.g. `example.com` for `alice@example.com` if `example.com` supports BrowserID.
+
+* open an invisible web content frame, e.g. IFRAME, settings its document location to `IDP(identity).provisioning`
+
+* respond to the IdP API calls.
+
+#### `navigator.id.beginProvisioning(object callback)` ####
+
+The User Agent SHOULD expect the callback parameter to be a function.
+
+The User Agent MUST invoke the callback asynchronously (i.e. after the call to `beginProvisioning` has returned) with parameters `CONTEXT.identity` and `CONTEXT.certValidityDuration`.
 
 <tt>navigator.id.genKeyPair(object callback);</tt>
 
-The User Agent SHOULD expect the callback to accept parameter <tt>pubkey</tt>, a serialized public-key string as per the above public-key spec.
+The User Agent MUST proceed to Provisioning Hard-Fail if this API call is made before `navigator.id.beginProvisioning`.
 
-In response to this call, the User Agent MUST generate a fresh keypair associated with the email address for this provisioning context. The secret key should be stored internally, and the <tt>callback</tt> should be invoked with the serialized public-key as sole argument.
+The User Agent SHOULD expect the callback parameter to be a function.
+
+The User Agent MUST generate a fresh keypair associated with the email address for this provisioning context. The secret key should be stored as `CERTS(identity)` where `CERTS(identity.cert` remains `undefined` for now. The User Agent MUST invoke <tt>callback</tt> with, as its single argument, `CERTS(identity).publicKey` serialized as a string.
 
 <tt>navigator.id.registerCertificate(certificate);</tt>
 
-The User Agent SHOULD expect the certificate to be a valid serialized certificate, as per the above spec. The User Agent SHOULD expect the trust root for this certificate to comply with the characteristics described in the "Acceptable Trust Paths" section.
+The User Agent MUST proceed to Provisioning Hard-Fail if this API call is made before `navigator.id.genKeyPair`.
 
-The User Agent MUST associate this certificate with the email address for this provisioning context and store this association internally for later issuance of Backed Identity Assertions.
+If `certificate` is not a valid serialized JSON Certificate, or if the trust-root for `certificate` is not `IDP(identity)`, the User Agent SHOULD proceed to Provisioning Hard-Fail.
+
+The User Agent MUST store the value of `certificate` in `CERTS(identity).cert`
 
 <tt>navigator.id.raiseProvisioningFailure(string reason);</tt>
 
-The User Agent MUST interrupt this provisioning workflow.
+The User Agent MUST proceed with Provisioning Soft-Fail.
 
-If the context indicates that the authentication workflow has already been invoked, then the User Agent SHOULD return from this workflow indicating failure to authenticate the user.
+#### Provisioning Soft-Fail ####
 
-If the context indicates that the authentication workflow has NOT already been invoked, then the User Agent SHOULD begin the Authentication Workflow (described below).
+The User Agent SHOULD close the provisioning content frame.
 
-#### Authenticating ####
+If `CONTEXT.authenticationDone` is `true`, proceed with Provisioning Hard-Fail.
 
-The User Agent MUST support an authentication workflow when a user wants to certify a new email address but has failed the provisioning workflow. An authentication workflow is initiated with some context:
+Otherwise, set `CONTEXT.authenticationDone` to `true` and proceed with Authentication.
 
-* the email address which requires authentication
+#### Provisioning Hard-Fail ####
 
-During an authentication workflow, the User Agent MUST support the following API calls:
+The User Agent SHOULD close the provisioning content frame if this hasn't yet been done.
 
-    navigator.id.beginAuthentication(object callback);
+The User Agent MUST declare failure on identity provisioning. The User Agent SHOULD surface an error message to the user. The User Agent MAY allow the user to retry.
 
-The User Agent SHOULD expect a callback function as parameter to this API call.
+### IdP Authentication ###
 
-When this function is invoked, the User Agent MUST invoke the callback function, passing to it the context's email address as parameter.
+The User Agent MUST support an authentication workflow using `CONTEXT` unchanged from the preceding Provisioning flow.
 
-    navigator.id.completeAuthentication();
+The User Agent MUST open a user-visible content frame and set its document location to `IDP(CONTEXT.identity).authentication`. The User Agent SHOULD provide a trusted indicator of the document's origin to the user, e.g. by displaying a URL bar.
 
-When this function is invoked, the User Agent MUST return to its provisioning workflow, retrieving the appropriate context for that provisioning workflow, with the added flag <tt>authenticationPerformed = true</tt>.
+The User Agent SHOULD allow the content frame to be navigated to any URL it desires, as per normal web flows. The User Agent SHOULD treat this content frame like a normal content frame opened to that origin as if it were a top-level frame, carrying appropriate cookies and `localStorage`.
 
-    navigator.id.raiseAuthenticationFailure(string reason);
+The User Agent MAY choose to limit the capabilities of this content frame in certain ways, e.g. allowing only SSL origins, restricting plug-ins, etc.
 
-When this function is invoked, the User Agent MUST return to its provisioning workflow and proceed with the failure case.
+The User Agent MUST support the following API calls in this content frame when the content frame document location matches the origin of `IDP(CONTEXT.identity).authentication`. The User Agent SHOULD proceed to Authentication Hard-Fail if these calls are invoked from an origin that doesn't match.
+
+#### `navigator.id.beginAuthentication(object callback)` ####
+
+The User Agent SHOULD expect `callback` to be a function.
+
+The User Agent MUST invoke the callback asynchronously (i.e. after the call to `beginAuthentication` has returned) with `CONTEXT.identity` as single parameter.
+
+#### navigator.id.completeAuthentication(); ####
+
+The User Agent MUST invoke the Provisioning Flow, continuing with the existing `CONTEXT`.
+
+#### navigator.id.cancelAuthentication(string reason); ####
+
+The User Agent MUST proceed to Provisioning Hard-Fail.
 
 #### WebIDL ####
 
@@ -437,20 +525,6 @@ A primary authority MUST:
 * declare support and parameters for BrowserID
 * provide a user-authentication web flow
 * provide a user-key-certification web flow
-
-### BrowserID Support Document ###
-
-A BrowserID support document MUST be a well-formed JSON document with at least these three fields: <tt>public-key</tt>, <tt>authentication</tt>, and <tt>provisioning</tt>. The document MAY contain additional JSON fields.
-
-The value of the <tt>public-key</tt> field MUST be a Public Key serialized as a JSON object, as defined above.
-
-The value of the <tt>authentication</tt> field MUST be a relative reference to a URI, as defined by [RFC3986](https://tools.ietf.org/html/rfc3986).
-
-The value of the <tt>provisioning</tt> field MUST also be a relative reference to a URI.
-
-#### BrowserID Delegated Support Document ####
-
-A BrowserID delegated-support document MUST be a well-formed JSON document with at least one field: <tt>authority</tt>. This field MUST be a domain name.
 
 ### Declaring Support and Parameters for BrowserID ###
 
