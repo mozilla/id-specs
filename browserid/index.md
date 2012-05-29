@@ -177,6 +177,9 @@ Typically on the web, login sessions are implemented with cookies and are comple
     callback will not be invoked.
   * If you supply an email address and that user is still logged in
     via BrowserID, your `onlogin` callback will not be invoked.
+  * If you supply an email address and a different user is logged in
+    via BrowserID, your `onlogin` callback will be invoked with a new assertion.
+    `onlogout` will not be invoked [XXX is this right?]
 
 ### Example Code
 
