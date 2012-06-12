@@ -250,7 +250,7 @@ Request an identity from the user.  This will cause a dialog to be opened to pro
   * `oncancel` - a callback that will be invoked if the user refuses to
     share an identity with the site.
 
-#### navigator.id.logout([callback]);
+#### navigator.id.logout();
 
 A function that should be invoked when a user wishes to logout of the current site (for instance, when clicking on an in-content logout button).  Will cause the `onlogout` callback passed to `navigator.id.watch()` to be invoked.
 
