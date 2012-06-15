@@ -243,9 +243,9 @@ Request an identity from the user.  This will cause a dialog to be opened to pro
   * `requiredEmail` *(optional)* - An email address that the user must
     use to log in.  When provided, the user may not select a different
     address, but may cancel the sign-in.
-  * `privacyURL` - URL to site's privacy policy.  When provided, a link
+  * `privacyPolicy` - URL to site's privacy policy.  When provided, a link
     will be displayed in the sign-in dialog.
-  * `tosURL` - URL to site's terms of service.  When provided, a link will
+  * `termsOfService` - URL to site's terms of service.  When provided, a link will
     be displayed in the sign-in dialog.
   * `oncancel` - a callback that will be invoked if the user refuses to
     share an identity with the site.
