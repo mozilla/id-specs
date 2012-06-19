@@ -34,20 +34,42 @@ BrowserID defines messages using the [JavaScript Object Signing and Encryption (
 
 ### Public Key ###
 
-A BrowserID public key is a JSON object that includes fields:
+A BrowserID public key is a [JSON Web Key (JWK)](http://tools.ietf.org/html/draft-jones-json-web-key-03) object. As specified by JWK, the key looks like:
+
+       {"alg":"RSA",
+        "mod": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx
+   4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMs
+   tn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2
+   QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbI
+   SD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqb
+   w0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
+        "exp":"AQAB",
+        "kid":"2011-04-29"}
+
+This structure includes:
 
 * <tt>alg</tt> the algorithm for which this key was generated, using JOSE taxonomy
-* additional fields specified by the algorithm, e.g. <tt>n</tt> and <tt>e</tt> for RSA public keys.
+* additional fields specified by the algorithm, e.g. <tt>mod</tt> and <tt>exp</tt> for RSA public keys.
+* <tt>kid</tt> an optional key identifier.
 
-For example:
+When more than one key might represent the same entity, a full JWK object is used:
 
-    {
-      "alg": "RS256",
-      "n" : "4b3c34...",
-      "e" : "93bc32...",
-    }
+     {"jwk":
+      [
+       {"alg":"RSA",
+        "mod": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx
+   4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMs
+   tn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2
+   QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbI
+   SD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqb
+   w0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
+        "exp":"AQAB",
+        "kid":"2011-04-29"}
 
-This data structure should move to [JSON Web Keys](http://tools.ietf.org/html/draft-jones-json-web-key-01).
+       ...
+      ]
+     }
+
 
 ### Identity Certificate ###
 
@@ -55,7 +77,7 @@ An Identity Certificate is a JSON Web Token (JWT) object with the following clai
 
 * <tt>exp</tt> the expiration as per JWT
 * <tt>iss</tt> the domain of the issuer as per JWT
-* <tt>public-key</tt> the serialized public key as defined above
+* <tt>publicKey</tt> the serialized public key as defined above
 * <tt>principal</tt> the principal being certified.
 
 The principal is a JSON object that indicates the type of principal, e.g.
@@ -71,11 +93,10 @@ A complete JWT set of claims then looks like:
     {
       "iss": "example.com",
       "exp": "1313971280961",
-      "public-key": {
-        "alg": "RS256",
-        "n" : "4b3c34...",
-        "e" : "93bc32...",
-      },
+      "publicKey": {
+        "alg":"RSA",
+        "mod": "0vx7agoebGcQSu...",
+        "exp":"AQAB"},
       "principal": {
         "email": "john@example.com"
       }
@@ -104,7 +125,7 @@ An assertion might look like (with line breaks for readability):
 
 which is a JWT with header:
 
-    {"alg": "RS64"}
+    {"alg": "RS256"}
 
 and a payload of:
 
@@ -122,9 +143,9 @@ where each cert and the identity assertion are base64url-encoded data structures
 
 ### BrowserID Support Document ###
 
-A BrowserID support document MUST be a well-formed JSON document with at least these three fields: <tt>public-key</tt>, <tt>authentication</tt>, and <tt>provisioning</tt>. The document MAY contain additional JSON fields.
+A BrowserID support document MUST be a well-formed JSON document with at least these three fields: <tt>jwk</tt>, <tt>authentication</tt>, and <tt>provisioning</tt>. The document MAY contain additional JSON fields.
 
-The value of the <tt>public-key</tt> field MUST be a Public Key serialized as a JSON object, as defined above.
+The value of the <tt>jwk</tt> field MUST be a JWK object as described above, with <tt>kid</tt> specified for all keys.
 
 The value of the <tt>authentication</tt> field MUST be a relative reference to a URI, as defined by [RFC3986](https://tools.ietf.org/html/rfc3986).
 
@@ -133,10 +154,14 @@ The value of the <tt>provisioning</tt> field MUST also be a relative reference t
 For example:
 
      {
-        "public-key": {
-            "algorithm": "RS",
-            "n": "1549887475809027603946509410....",
-            "e": "65537"},
+        "jwk": [
+           {
+            "algorithm": "RSA",
+            ...,
+            "kid": "2012-06-20"
+           },
+           ...
+        ],
         "authentication": "/browserid/sign_in.html",
         "provisioning": "/browserid/provision.html"
      }
