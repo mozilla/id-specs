@@ -30,7 +30,7 @@ Terms
 Objects / Messages
 -
 
-BrowserID defines messages using the [JOSE specifications](http://www.ietf.org/dyn/wg/charter/jose-charter) for signing JSON-formatted objects.
+BrowserID defines messages using the [JavaScript Object Signing and Encryption (JOSE) specifications](http://www.ietf.org/dyn/wg/charter/jose-charter) for signing JSON-formatted objects.
 
 ### Public Key ###
 
@@ -51,7 +51,7 @@ This data structure should move to [JSON Web Keys](http://tools.ietf.org/html/dr
 
 ### Identity Certificate ###
 
-An Identity Certificate is a JWT object with the following claims:
+An Identity Certificate is a JSON Web Token (JWT) object with the following claims:
 
 * <tt>exp</tt> the expiration as per JWT
 * <tt>iss</tt> the domain of the issuer as per JWT
