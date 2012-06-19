@@ -307,7 +307,7 @@ Consider Alice, a user of <tt>EyeDee.me</tt>, with email address <tt>alice@eyede
  }
 
  function onCancel() {
-   navigator.id.cancelAuthentication();
+   navigator.id.raiseAuthenticationFailure("user canceled");
  }
 </pre>
 
@@ -440,7 +440,7 @@ The User Agent MUST invoke the callback asynchronously (i.e. after the call to `
 
 The User Agent MUST invoke the Provisioning Flow, continuing with the existing `CONTEXT`.
 
-#### navigator.id.cancelAuthentication(string reason); ####
+#### navigator.id.raiseAuthenticationFailure(string reason); ####
 
 The User Agent MUST proceed to Provisioning Hard-Fail.
 
