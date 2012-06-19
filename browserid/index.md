@@ -555,7 +555,7 @@ The domain MUST call, in JavaScript:
 <pre>
 navigator.id.beginProvisioning(provisionEmailFunction);
 </pre>
-with <tt>provisionEmailFunction</tt> a function that accepts an email address as parameter.
+with <tt>provisionEmailFunction</tt> a function that accepts an email address and a certificate validity duration as parameters.
 
 Once the email address determined, the domain SHOULD check that the user is properly authenticated to use this email address. If she isn't, the domain SHOULD call
 <pre>
