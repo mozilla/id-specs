@@ -44,7 +44,7 @@ A BrowserID public key is a [JSON Web Key (JWK)](http://tools.ietf.org/html/draf
    SD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqb
    w0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
         "exp":"AQAB",
-        "kid":"2011-04-29"}
+        "kid":"key-2011-04-29"}
 
 This structure includes:
 
@@ -64,7 +64,7 @@ When more than one key might represent the same entity, a full JWK object is use
    SD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqb
    w0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
         "exp":"AQAB",
-        "kid":"2011-04-29"}
+        "kid":"key-2011-04-29"}
 
        ...
       ]
@@ -158,7 +158,7 @@ For example:
            {
             "algorithm": "RSA",
             ...,
-            "kid": "2012-06-20"
+            "kid": "generated-on-2012-06-20"
            },
            ...
         ],
