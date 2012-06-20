@@ -108,6 +108,40 @@ Which, when signed, becomes a base64url-encoded data structure which looks like 
     eyJpc3MiOiJicm93c2VyaWQub3JnIiwiZXhwIjoxM...
     hv5wVN0HPINUZlLi4SJo9RzJhMU5_6XZsltYWODDD...
 
+#### Chained Certificates ####
+
+When a certificate certifies a key, it is meant ONLY as a binding of the key to an identity. This binding MUST NOT be interpreted as a grant of certification authority to that key, UNLESS the certificate explicitly indicates such delegation of authority.
+
+To perform this delegation, the certificate MUST include the field:
+
+    ...
+      "delegate": {
+        ...
+      }
+    ...
+
+The specifics of the delegation field indicate how much delegation of authority is indicated. At this time, only two types of delegation are supported:
+
+    ...
+      "delegate": {
+        "all": true
+      }
+    ...
+
+which explicitly delegates all authority.
+
+Also:
+
+    ...
+      "delegate": {
+        "domains": ["foo.com", "bar.com"]
+      }
+    ...
+
+which delegates only certification of users at those domains.
+
+#### JOSE Spec ####
+
 The JOSE spec currently does not specify a certificate format beyond JWS signatures. If it eventually does, we will consider moving to it.
 
 ### Identity Assertion ###
