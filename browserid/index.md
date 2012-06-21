@@ -34,7 +34,7 @@ BrowserID defines messages using the [JavaScript Object Signing and Encryption (
 
 ### Public Key ###
 
-A BrowserID public key is a [JSON Web Key (JWK)](http://tools.ietf.org/html/draft-jones-json-web-key-03) object. As specified by JWK, the key looks like:
+A BrowserID public key is a [JSON Web Key (JWK)](http://tools.ietf.org/html/draft-ietf-jose-json-web-key-01) object. As specified by JWK, the key looks like:
 
        {"alg":"RSA",
         "mod": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx
@@ -667,4 +667,4 @@ References
 --
 
 * JWT: http://self-issued.info/docs/draft-jones-json-web-token-04.html
-* JWK: http://self-issued.info/docs/draft-jones-json-web-key.html
+* JWK: http://tools.ietf.org/html/draft-ietf-jose-json-web-key-01
