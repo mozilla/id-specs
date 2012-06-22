@@ -167,13 +167,19 @@ and a payload of:
 
 ### Backed Identity Assertion ###
 
-A Backed Identity Assertion is a combination of an Identity Assertion and a single sequence of Identity Certificates that verifiably tie the assertion to an issuing domain. Most often, a backed identity assertion is a single certificate tying a public-key to an Identity, signed by the domain, and an Identity Assertion signed by the just-certified public key.
-
-A Backed Identity Assertion is:
+A Backed Identity Assertion is a combination of an Identity Assertion and a sequence of Identity Certificates that verifiably tie the assertion to an issuing domain. This combination is expressed as a single string like this:
 
     <cert-1>~...<cert-n>~<identityAssertion>;
 
-where each cert and the identity assertion are base64url-encoded data structures, as defined above.
+where each cert and the identity assertion are base64url-encoded data structures, as defined above, the strings are joined by tilde characters (U+007E), and the final combination is terminated by a semicolon (U+003B).
+
+The first element is certified by the issuing domain's private key, and each subsequent element is certified by the previous one.
+
+Most often, a backed identity assertion is a single certificate tying a public-key to an Identity (signed by the domain), and an Identity Assertion signed by the just-certified public key, e.g:
+
+    <cert-1>~<identityAssertion>;
+
+in which cert-1 has an "iss" of the issuing domain (e.g. "example.com"), a "publicKey" of the user's certified key, a "principal" of <tt>{"email": "user@example.com"}</tt>, and is signed by the example.com private key. The identityAssertion would have an "exp" and "aud" field, and is signed by the user's private key.
 
 ### BrowserID Support Document ###
 
