@@ -102,9 +102,9 @@ A complete JWT set of claims then looks like:
       }
     }
 
-Which, when signed, becomes a base64url-encoded data structure which looks like (with linebreaks and truncated values for for easier reading):
+Which, when signed, becomes a base64url-encoded data structure which looks like the following (with linebreaks and truncated values for for easier reading; the full string has exactly two periods and no whitespace):
 
-    eyJhbGciOiJSUzI1NiJ9.
+    eyJhbGciOiAiUlMyNTYiLCAidHlwIjogIkpXVCJ9.
     eyJpc3MiOiJicm93c2VyaWQub3JnIiwiZXhwIjoxM...
     hv5wVN0HPINUZlLi4SJo9RzJhMU5_6XZsltYWODDD...
 
@@ -153,17 +153,17 @@ An Identity Assertion is a JWT with the following claims:
 
 An assertion might look like (with line breaks for readability):
 
-    eyJhbGciOiJSUzY0In0.
+    eyJhbGciOiAiUlMyNTYiLCAidHlwIjogIkpXVCJ9.
     eyJleHAiOjEzMjAyODA1Nzk0MzcsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MTAwMDEifQ.
     JmEBqwOH_qzw6_EHsCRB-CeShGyQ2y0bpapARZ308_8uT6TCWrKBpB8L2bFnMb664lz1nGytkBXF-tTIzGCOjg
 
 which is a JWT with header:
 
-    {"alg": "RS256"}
+    {"typ":"JWT", "alg":"RS256"}
 
 and a payload of:
 
-    {"exp":1320280579437,"aud":"http://localhost:10001"}
+    {"exp":1320280579437, "aud":"http://localhost:10001"}
 
 ### Backed Identity Assertion ###
 
