@@ -50,7 +50,7 @@ This structure includes:
 
 * <tt>alg</tt> the algorithm for which this key was generated, using JOSE taxonomy
 * additional fields specified by the algorithm, e.g. <tt>mod</tt> and <tt>exp</tt> for RSA public keys.
-* <tt>kid</tt> an optional key identifier.
+* <tt>kid</tt> an optional key identifier, which will be matched against the "kid" field in JWS signature objects. The format is arbitrary, but some sort of generation-number or date is commonly used to facilitate key rotation.
 
 When more than one key might represent the same entity, a full JWK object is used:
 
