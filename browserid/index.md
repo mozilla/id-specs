@@ -110,6 +110,10 @@ Which, when signed, becomes a base64url-encoded data structure which looks like 
 
 #### Chained Certificates ####
 
+Most of the time, a certificate is used to bind a key to an identity. But in some cases, they are used to delegate certification authority to another key. For example, the example.com IdP might publish a single master key, but have separate working keys for a number of load-balanced servers. Each server will be granted a certificate that authorizes its individual key to speak for the the whole example.com domain.
+
+There can be multiple levels of delegation between the initial issuer key and the final assertion. The term "Certificate chain" is used to describe this sequence of certificates, in which the first n-1 certificates delegate authority to the next, and the final certificate authorizes a specific key to speak for a specific identity (i.e. binds a key to an identity).
+
 When a certificate certifies a key, it is meant ONLY as a binding of the key to an identity. This binding MUST NOT be interpreted as a grant of certification authority to that key, UNLESS the certificate explicitly indicates such delegation of authority.
 
 To perform this delegation, the certificate MUST include the field:
@@ -139,6 +143,8 @@ Also:
     ...
 
 which delegates only certification of users at those domains.
+
+Delgations are subtractive: the total power granted to a key is the minimum of the `delegate` records in the chain preceding that key. Implementations must be careful to avoid bugs in which only the next-to-last certificate is evaluated.
 
 #### JOSE Spec ####
 
