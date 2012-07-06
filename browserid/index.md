@@ -84,9 +84,9 @@ The principal is a JSON object that indicates the type of principal, e.g.
 
     {"email": "bob@example.com"}
 
-or
+or to specify a domain but not yet a user:
 
-    {"host": "intermediate.example.com"}
+    {"domain": "example.com"}
 
 A complete JWT set of claims then looks like:
 
@@ -110,41 +110,25 @@ Which, when signed, becomes a base64url-encoded data structure which looks like 
 
 #### Chained Certificates ####
 
-Most of the time, a certificate is used to bind a key to an identity. But in some cases, they are used to delegate certification authority to another key. For example, the example.com IdP might publish a single master key, but have separate working keys for a number of load-balanced servers. Each server will be granted a certificate that authorizes its individual key to speak for the the whole example.com domain.
+Most of the time, a certificate is used to bind a key to an identity. But in some cases, they are used to delegate certification authority to another key. For example, the <tt>example.com</tt> IdP might publish a single master key, but have separate working keys for a number of load-balanced servers. Each server will be granted a certificate that authorizes its individual key to speak for the the whole example.com domain.
 
-There can be multiple levels of delegation between the initial issuer key and the final assertion. The term "Certificate chain" is used to describe this sequence of certificates, in which the first n-1 certificates delegate authority to the next, and the final certificate authorizes a specific key to speak for a specific identity (i.e. binds a key to an identity).
+There can be multiple levels of delegation between the initial issuer key and the final assertion. The term "certificate chain" is used to describe this sequence of certificates, in which the first n-1 certificates delegate authority to the next, and the final certificate authorizes a specific key to speak for a specific identity (i.e. binds a key to an identity).
 
-When a certificate certifies a key, it is meant ONLY as a binding of the key to an identity. This binding MUST NOT be interpreted as a grant of certification authority to that key, UNLESS the certificate explicitly indicates such delegation of authority.
+Certificate delegation is tricky and potentially opens up avenues for attacks. Thus, we take two important precautions:
 
-To perform this delegation, the certificate MUST include the field:
+* by default, a certificate chain cannot be extended, unless the last certificate is explicitly designated as allowing chaining.
 
-    ...
-      "delegate": {
-        ...
-      }
-    ...
+* certificate grants are subtractive: once a chain is contrained to a principal, its scope can no longer be broadened.
 
-The specifics of the delegation field indicate how much delegation of authority is indicated. At this time, only two types of delegation are supported:
+To allow chaining, a certificate must include:
 
     ...
-      "delegate": {
-        "all": true
-      }
+      "allowChaining": true
     ...
 
-which explicitly delegates all authority.
+The following fields are considered in the certificate chain verification: <tt>principal</tt>, <tt>exp</tt>. These constraints are combined. A principal indicating an email address is considered a subset of a principal for the corresponding domain. A principal must be included in any certificate, or it is assumed that the null principal is being certified, and that chain becomes useless. A later certificate cannot certify a principal that isn't included within an earlier certificate. And a later certificate cannot extend the expiration time of an earlier certificate in a chain.
 
-Also:
-
-    ...
-      "delegate": {
-        "domains": ["foo.com", "bar.com"]
-      }
-    ...
-
-which delegates only certification of users at those domains.
-
-Delgations are subtractive: the total power granted to a key is the minimum of the `delegate` records in the chain preceding that key. Implementations must be careful to avoid bugs in which only the next-to-last certificate is evaluated.
+Implementations MUST be VERY CAREFUL to avoid bugs in which only the next-to-last certificate is evaluated.
 
 #### JOSE Spec ####
 
