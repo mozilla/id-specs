@@ -50,7 +50,7 @@ This structure includes:
 
 * <tt>alg</tt> the algorithm for which this key was generated, using JOSE taxonomy
 * additional fields specified by the algorithm, e.g. <tt>mod</tt> and <tt>exp</tt> for RSA public keys.
-* <tt>kid</tt> an optional key identifier.
+* <tt>kid</tt> an optional key identifier, which will be matched against the "kid" field in JWS signature objects. The format is arbitrary, but some sort of generation-number or date is commonly used to facilitate key rotation.
 
 When more than one key might represent the same entity, a full JWK object is used:
 
@@ -102,13 +102,17 @@ A complete JWT set of claims then looks like:
       }
     }
 
-Which, when signed, becomes a base64url-encoded data structure which looks like (with linebreaks and truncated values for for easier reading):
+Which, when signed, becomes a base64url-encoded data structure which looks like the following (with linebreaks and truncated values for for easier reading; the full string has exactly two periods and no whitespace):
 
-    eyJhbGciOiJSUzI1NiJ9.
+    eyJhbGciOiAiUlMyNTYiLCAidHlwIjogIkpXVCJ9.
     eyJpc3MiOiJicm93c2VyaWQub3JnIiwiZXhwIjoxM...
     hv5wVN0HPINUZlLi4SJo9RzJhMU5_6XZsltYWODDD...
 
 #### Chained Certificates ####
+
+Most of the time, a certificate is used to bind a key to an identity. But in some cases, they are used to delegate certification authority to another key. For example, the example.com IdP might publish a single master key, but have separate working keys for a number of load-balanced servers. Each server will be granted a certificate that authorizes its individual key to speak for the the whole example.com domain.
+
+There can be multiple levels of delegation between the initial issuer key and the final assertion. The term "Certificate chain" is used to describe this sequence of certificates, in which the first n-1 certificates delegate authority to the next, and the final certificate authorizes a specific key to speak for a specific identity (i.e. binds a key to an identity).
 
 When a certificate certifies a key, it is meant ONLY as a binding of the key to an identity. This binding MUST NOT be interpreted as a grant of certification authority to that key, UNLESS the certificate explicitly indicates such delegation of authority.
 
@@ -140,6 +144,8 @@ Also:
 
 which delegates only certification of users at those domains.
 
+Delgations are subtractive: the total power granted to a key is the minimum of the `delegate` records in the chain preceding that key. Implementations must be careful to avoid bugs in which only the next-to-last certificate is evaluated.
+
 #### JOSE Spec ####
 
 The JOSE spec currently does not specify a certificate format beyond JWS signatures. If it eventually does, we will consider moving to it.
@@ -153,27 +159,33 @@ An Identity Assertion is a JWT with the following claims:
 
 An assertion might look like (with line breaks for readability):
 
-    eyJhbGciOiJSUzY0In0.
+    eyJhbGciOiAiUlMyNTYiLCAidHlwIjogIkpXVCJ9.
     eyJleHAiOjEzMjAyODA1Nzk0MzcsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MTAwMDEifQ.
     JmEBqwOH_qzw6_EHsCRB-CeShGyQ2y0bpapARZ308_8uT6TCWrKBpB8L2bFnMb664lz1nGytkBXF-tTIzGCOjg
 
 which is a JWT with header:
 
-    {"alg": "RS256"}
+    {"typ":"JWT", "alg":"RS256"}
 
 and a payload of:
 
-    {"exp":1320280579437,"aud":"http://localhost:10001"}
+    {"exp":1320280579437, "aud":"http://localhost:10001"}
 
 ### Backed Identity Assertion ###
 
-A Backed Identity Assertion is a combination of an Identity Assertion and a single sequence of Identity Certificates that verifiably tie the assertion to an issuing domain. Most often, a backed identity assertion is a single certificate tying a public-key to an Identity, signed by the domain, and an Identity Assertion signed by the just-certified public key.
+A Backed Identity Assertion is a combination of an Identity Assertion and a sequence of Identity Certificates that verifiably tie the assertion to an issuing domain. This combination is expressed as a single string like this:
 
-A Backed Identity Assertion is:
+    <cert-1>~...<cert-n>~<identityAssertion>
 
-    <cert-1>~...<cert-n>~<identityAssertion>;
+where each cert and the identity assertion are base64url-encoded data structures, as defined above, and the strings are joined by tilde characters (U+007E).
 
-where each cert and the identity assertion are base64url-encoded data structures, as defined above.
+The first element is certified by the issuing domain's private key, and each subsequent element is certified by the previous one.
+
+Most often, a backed identity assertion is a single certificate tying a public-key to an Identity (signed by the domain), and an Identity Assertion signed by the just-certified public key, e.g:
+
+    <cert-1>~<identityAssertion>
+
+in which cert-1 has an "iss" of the issuing domain (e.g. "example.com"), a "publicKey" of the user's certified key, a "principal" of <tt>{"email": "user@example.com"}</tt>, and is signed by the example.com private key. The identityAssertion would have an "exp" and "aud" field, and is signed by the user's private key.
 
 ### BrowserID Support Document ###
 
