@@ -110,6 +110,13 @@ Which, when signed, becomes a base64url-encoded data structure which looks like 
     eyJpc3MiOiJicm93c2VyaWQub3JnIiwiZXhwIjoxM...
     hv5wVN0HPINUZlLi4SJo9RzJhMU5_6XZsltYWODDD...
 
+#### Locating the Public Key ####
+
+An Identity Certificate SHOULD reference, using the normal JWT mechanism, the <tt>kid</tt> of the public key that should be used for verification. This is indicated in the JWT header:
+
+    {"typ":"JWT", "alg":"RSA", "kid": "key-2011-04-29"}
+
+
 #### Chained Certificates ####
 
 Most of the time, a certificate is used to bind a key to an identity. But in some cases, they are used to delegate certification authority to another key. For example, the <tt>example.com</tt> IdP might publish a single master key, but have separate working keys for a number of load-balanced servers. Each server will be granted a certificate that authorizes its individual key to speak for the the whole example.com domain.
