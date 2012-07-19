@@ -54,7 +54,7 @@ This structure includes:
 * additional fields specified by the algorithm, e.g. <tt>modulus</tt> and <tt>exponent</tt> for RSA public keys.
 * <tt>kid</tt> an optional key identifier, which will be matched against the "kid" field in JWS signature objects. The format is arbitrary, but some sort of generation-number or date is commonly used to facilitate key rotation.
 
-When more than one key might represent the same entity, a key-value pair object of cryptographic keys is used
+When more than one key might represent the same entity, a key-value pair object of cryptographic keys is used, and the <tt>kid</tt> is specified as the key of that key-value pair, rather than inside the object.
 
      ....
      "publicKeys": {
