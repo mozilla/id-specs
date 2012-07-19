@@ -92,8 +92,8 @@ or to specify a domain but not yet a user:
 A complete JWT set of claims then looks like:
 
     {
-      "issuer": "example.com",
-      "expiresAt": "1313971280961",
+      "iss": "example.com",
+      "exp": "1313971280961",
       "publicKey": {
         "version": "2012.08.15",
         "algorithm":"RSA",
