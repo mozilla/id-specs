@@ -34,41 +34,42 @@ BrowserID defines messages using the [JavaScript Object Signing and Encryption (
 
 ### Public Key ###
 
-A BrowserID public key is a [JSON Web Key (JWK)](http://tools.ietf.org/html/draft-ietf-jose-json-web-key-01) object. As specified by JWK, the key looks like:
+A BrowserID public key is based [JSON Web Key (JWK)](http://tools.ietf.org/html/draft-ietf-jose-json-web-key-01), but since that standard is in flux, we have chosen a readable variant, with explicit versioning:
 
-       {"alg":"RSA",
-        "mod": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx
+       {"version": "2012.08.15",
+        "algorithm":"RSA",
+        "modulus": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx
     4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMs
     tn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2
     QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbI
     SD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqb
     w0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
-        "exp":"AQAB",
+        "exponent":"AQAB",
         "kid":"key-2011-04-29"}
 
 This structure includes:
 
-* <tt>alg</tt> the algorithm for which this key was generated, using JOSE taxonomy
-* additional fields specified by the algorithm, e.g. <tt>mod</tt> and <tt>exp</tt> for RSA public keys.
+* <tt>version</tt> a version field, set to <tt>2012.08.15</tt> for the BrowserID Beta data format version.
+* <tt>algorithm</tt> the algorithm for which this key was generated, using JOSE taxonomy
+* additional fields specified by the algorithm, e.g. <tt>modulus</tt> and <tt>exponent</tt> for RSA public keys.
 * <tt>kid</tt> an optional key identifier, which will be matched against the "kid" field in JWS signature objects. The format is arbitrary, but some sort of generation-number or date is commonly used to facilitate key rotation.
 
-When more than one key might represent the same entity, a full JWK object is used:
+When more than one key might represent the same entity, a key-value pair object of cryptographic keys is used
 
-     {"jwk":
-      [
-       {"alg":"RSA",
-        "mod": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx
-    4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMs
-    tn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2
-    QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbI
-    SD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqb
-    w0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
-        "exp":"AQAB",
-        "kid":"key-2011-04-29"}
-
-       ...
-      ]
-     }
+     ....
+     "publicKeys" {
+       "key-2011-04-29":
+           {"version": "2012.08.15",
+            "algorithm":"RSA",
+            "modulus": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx
+                4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMs
+                tn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2
+                QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbI
+                SD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqb
+                w0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
+            "exponent":"AQAB"}
+       }
+     ....
 
 
 ### Identity Certificate ###
@@ -91,12 +92,13 @@ or to specify a domain but not yet a user:
 A complete JWT set of claims then looks like:
 
     {
-      "iss": "example.com",
-      "exp": "1313971280961",
+      "issuer": "example.com",
+      "expiresAt": "1313971280961",
       "publicKey": {
-        "alg":"RSA",
-        "mod": "0vx7agoebGcQSu...",
-        "exp":"AQAB"},
+        "version": "2012.08.15",
+        "algorithm":"RSA",
+        "modulus": "0vx7agoebGcQSu...",
+        "exponent":"AQAB"},
       "principal": {
         "email": "john@example.com"
       }
@@ -184,14 +186,15 @@ The value of the <tt>provisioning</tt> field MUST also be a relative reference t
 For example:
 
      {
-        "jwk": [
-           {
-            "algorithm": "RSA",
-            ...,
-            "kid": "generated-on-2012-06-20"
-           },
+        "publicKeys": {
+           "generated-on-2012-06-20":
+               {
+                "algorithm": "RSA",
+                ...,
+                "kid": "generated-on-2012-06-20"
+               },
            ...
-        ],
+        },
         "authentication": "/browserid/sign_in.html",
         "provisioning": "/browserid/provision.html"
      }
