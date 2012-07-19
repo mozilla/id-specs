@@ -57,7 +57,7 @@ This structure includes:
 When more than one key might represent the same entity, a key-value pair object of cryptographic keys is used
 
      ....
-     "publicKeys" {
+     "publicKeys": {
        "key-2011-04-29":
            {"version": "2012.08.15",
             "algorithm":"RSA",
