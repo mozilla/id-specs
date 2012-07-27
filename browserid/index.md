@@ -515,7 +515,7 @@ The User Agent MUST proceed to Provisioning Hard-Fail.
  module navigator {
      module id {
          void beginProvisioning(object callback);
-         void genKeyPair(string email, object callback);
+         void genKeyPair(object callback);
          void registerCertificate(string certificate);
          void raiseProvisioningFailure(string reason);
 
