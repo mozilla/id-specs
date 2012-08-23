@@ -1,7 +1,7 @@
 BrowserID
 =====
 
-This is the <em>development</em> BrowserID specification, working live at https://dev.diresworb.org.
+This is the <em>Beta1</em> BrowserID specification, going live at <tt>https://login.persona.org</tt> in September 2012.
 
 Overview
 -
