@@ -28,7 +28,7 @@ Terms
   <dd>A signer of Identity Certificates for identities that are directly within this authority's domain, e.g. `example.com` certifies `*@example.com`.</dd>
 
   <dt>Fallback Identity Provider</dt>
-  <dd>A signer of Identity Certificates for identities that are ''not'' directly within this authority's domain.</dd>
+  <dd>A signer of Identity Certificates for identities that are _not_ directly within this authority's domain.</dd>
 
   <dt>Audience/Relying Party</dt>
   <dd>A system, typically a web site, that needs to verify an Identity.</dd>
