@@ -14,21 +14,21 @@ A fallback identity provider is provided to bootstrap users with email addresses
 Terms
 -----
 
-- Identity: an email address controlled by the user.
+* Identity: an email address controlled by the user.
 
-- Public Key: the public portion of an asymmetric cryptographic keypair used in a digital signature algorithm.
+* Public Key: the public portion of an asymmetric cryptographic keypair used in a digital signature algorithm.
 
-- Identity Certificate: a digitally signed statement that binds a given Public Key to a given Identity.
+* Identity Certificate: a digitally signed statement that binds a given Public Key to a given Identity.
 
-- Identity Provider: a signer of Identity Certificates for identities that are directly within this authority's domain, e.g. `example.com` certifies `*@example.com`.
+* Identity Provider: a signer of Identity Certificates for identities that are directly within this authority's domain, e.g. `example.com` certifies `*@example.com`.
 
-- Fallback Identity Provider: a signer of Identity Certificates for identities that are ''not'' directly within this authority's domain.
+* Fallback Identity Provider: a signer of Identity Certificates for identities that are ''not'' directly within this authority's domain.
 
-- Audience/Relying Party: a system, typically a web site, that needs to verify an Identity.
+* Audience/Relying Party: a system, typically a web site, that needs to verify an Identity.
 
-- Identity Assertion: a digitally signed statement indicating a request to login to a particular relying party.
+* Identity Assertion: a digitally signed statement indicating a request to login to a particular relying party.
 
-- Backed Identity Assertion: an Identity Assertion combined with the requisite Identity Certificates that enable a Relying Party to fully verify the Identity Assertion.
+* Backed Identity Assertion: an Identity Assertion combined with the requisite Identity Certificates that enable a Relying Party to fully verify the Identity Assertion.
 
 Objects / Messages
 ------------------
@@ -603,7 +603,7 @@ The User Agent MUST offer the following APIs and behave as described in response
 The User Agent SHOULD throw an exception immediately UNLESS `params` includes the following parameters:
 
 1. `onlogin`: a function
-1. `onlogout`: a function
+2. `onlogout`: a function
 
 If `params` includes the above required parameters, the User Agent SHOULD store the entire `params` object scoped to the `document`, including the above callbacks and any additional fields.
 If the `document` DOM object disappears for any reason (unloading, closing, etc.), these callbacks should be garbage-collected.
@@ -622,18 +622,18 @@ The Relying Party MAY call the navigator.id.request method when it wishes to req
 When this happens, the User Agent SHOULD pursue the following actions:
 
 1. Establish the origin of the requesting site (including scheme and non-standard port).
-1. Check local BrowserID store for known identities that have been successfully used previously.
-1. Present the list of known identities.
+2. Check local BrowserID store for known identities that have been successfully used previously.
+3. Present the list of known identities.
 The User Agent MAY suggest a preferred identity out of that list based on heuristics or other internal state, e.g.
 the email last used on that site.
-1. When the user selects an Identity:
- - check that the associated certificate is still valid.
+4. When the user selects an Identity:
+ * check that the associated certificate is still valid.
    If not, initiate a provisioning workflow for that Identity, then continue once it returns successfully.
- - generate an Identity Assertion using the requesting site's origin as audience and the current time.
+ * generate an Identity Assertion using the requesting site's origin as audience and the current time.
    Bundle with the associated certificate to create a Backed Identity Assertion, and fire a `login` event on the `navigator.id` object with a serialization of the Backed Identity Assertion in the `assertion` field of the event, then terminate the login workflow.
-1. If no Identities are known, or if the user wishes to use a new Identity, the User Agent should prompt the user for this new identity and use it to initiate a Provisioning workflow (see below).
+5. If no Identities are known, or if the user wishes to use a new Identity, the User Agent should prompt the user for this new identity and use it to initiate a Provisioning workflow (see below).
 Once provisioning has completed, the User Agent SHOULD present the updated list of identities to the user.
-1. If, at any point, the user cancels the login process, fire a `logincanceled` event on the `navigator.id` object and terminate the login workflow.
+6. If, at any point, the user cancels the login process, fire a `logincanceled` event on the `navigator.id` object and terminate the login workflow.
 
 By the end of the process, the User Agent MUST fire one of two events on the `navigator.id` object:
 
@@ -727,14 +727,14 @@ To verify a Backed Identity Assertion, a Relying Party SHOULD perform the follow
 
 1. If the `exp` date of the assertion is earlier than the current time by more than a certain interval, the assertion has expired and must be rejected.
 A Relying Party MAY choose the length of that interval, though it is recommended that it be less than 5 minutes.
-1. If the `audience` field of the assertion does not match the Relying Party's origin (including scheme and optional non-standard port), reject the assertion.
+2. If the `audience` field of the assertion does not match the Relying Party's origin (including scheme and optional non-standard port), reject the assertion.
 A domain that includes the standard port, of 80 for HTTP and 443 for HTTPS, SHOULD be treated as equivalent to a domain that matches the protocol but does not include the port.
 (XXX: Can we find an RFC that defines this equality test?)
-1. If the Identity Assertion's signature does not verify against the public-key within the last Identity Certificate, reject the assertion.
-1. If there is more than one Identity Certificate, then reject the assertion unless each certificate after the first one is properly signed by the prior certificate's public key.
-1. If the first certificate (or only certificate when there is only one) is not properly signed by the expected issuer's public key, reject the assertion.
+3. If the Identity Assertion's signature does not verify against the public-key within the last Identity Certificate, reject the assertion.
+4. If there is more than one Identity Certificate, then reject the assertion unless each certificate after the first one is properly signed by the prior certificate's public key.
+5. If the first certificate (or only certificate when there is only one) is not properly signed by the expected issuer's public key, reject the assertion.
 The expected issuer is either the domain of the certified email address in the last certificate, or the issuer listed in the first certificate if the email-address domain does not support BrowserID.
-1. If the expected issuer was designated by the certificate rather than discovered given the user's email address, then the issuer SHOULD be `browserid.org`, otherwise reject the assertion.
+6. If the expected issuer was designated by the certificate rather than discovered given the user's email address, then the issuer SHOULD be `browserid.org`, otherwise reject the assertion.
 
 Note that a relying party may, at its discretion, use a verification service that performs these steps and returns a summary of results.
 In that case, the verification service MUST perform all the checks described here.
