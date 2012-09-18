@@ -242,12 +242,10 @@ Web-Site Signin Flow
 
 _This section is informative._
 
-The BrowserID JavaScript API can be used by web sites to implement
-authentication.
+The BrowserID JavaScript API can be used by web sites to implement authentication.
 Implementing BrowserID support consists of:
 
-  1. registering callback functions that will be invoked when the user logs in or out
-     via `navigator.id.watch()`
+  1. registering callback functions that will be invoked when the user logs in or out via `navigator.id.watch()`
   2. invoking `navigator.id.request()` when the user clicks a login button on your site.
   3. invoking `navigator.id.logout()` when the user clicks a logout button on your site.
 
@@ -264,12 +262,9 @@ Each page of your site should call `navigator.id.watch()` and be prepared to han
 When supplied, this parameter tells BrowserID whether the current page load is associated with a logged in user.
 By supplying this parameter, you can speed up your page load by suppressing unnecessary callbacks (and using less CPU and network resources):
 
-  * If you supply `null`, and no user is logged in according to BrowserID, your `onlogout`
-    callback will not be invoked.
-  * If you supply an email address and that user is still logged in
-    via BrowserID, your `onlogin` callback will not be invoked.
-  * If you supply an email address and a different user is logged in
-    via BrowserID, your `onlogin` callback will be invoked with a new assertion.
+  * If you supply `null`, and no user is logged in according to BrowserID, your `onlogout` callback will not be invoked.
+  * If you supply an email address and that user is still logged in via BrowserID, your `onlogin` callback will not be invoked.
+  * If you supply an email address and a different user is logged in via BrowserID, your `onlogin` callback will be invoked with a new assertion.
     `onlogout` will not be invoked [XXX is this right?]
 
 ### Example Code
@@ -312,25 +307,14 @@ By supplying this parameter, you can speed up your page load by suppressing unne
 Register callbacks to be notified when the user logs in or out.
 The option block has the following properties:
 
-  * `loggedInEmail` *(optional)* - The email address of the currently logged
-    in user.
-    May be a string (email address), or `null` (indicating
-    no user is logged in).
-    If provided, the `onlogin` or `onlogout`
-    callbacks will not be invoked if the users' login state is
-    consistent with the value provided.
-    If omitted or `undefined`,
-    one of the two callbacks will be invoked on every page load.
-  * `onlogin` *(required)* - A callback that will be invoked and
-    passed a single argument, an assertion, when the user logs in.
-  * `onlogout` *(required)* - A callback that will be invoked when
-    the user logs out.
-  * `onready` *(optional)* - A callback that will always be called
-    once the navigator.id service is initialized (after `onlogin` or
-    `onlogout` have been called).
-    By waiting to display UI until this
-    point, you can avoid UI flicker in the case where your session is out
-    of sync with BrowserID.
+  * `loggedInEmail` *(optional)* - The email address of the currently logged in user.
+    May be a string (email address), or `null` (indicating no user is logged in).
+    If provided, the `onlogin` or `onlogout` callbacks will not be invoked if the users' login state is consistent with the value provided.
+    If omitted or `undefined`, one of the two callbacks will be invoked on every page load.
+  * `onlogin` *(required)* - A callback that will be invoked and passed a single argument, an assertion, when the user logs in.
+  * `onlogout` *(required)* - A callback that will be invoked when the user logs out.
+  * `onready` *(optional)* - A callback that will always be called once the navigator.id service is initialized (after `onlogin` or `onlogout` have been called).
+    By waiting to display UI until this point, you can avoid UI flicker in the case where your session is out of sync with BrowserID.
 
 #### navigator.id.request(&lt;options&gt;);
 
@@ -339,18 +323,13 @@ This will cause a dialog to be opened to prompt the user for an email address to
 This function must be invoked from within a click handler.
 The argument is an options block which may contain the following properties:
 
-  * `requiredEmail` *(optional)* - An email address that the user must
-    use to log in.
-    When provided, the user may not select a different
-    address, but may cancel the sign-in.
+  * `requiredEmail` *(optional)* - An email address that the user must use to log in.
+    When provided, the user may not select a different address, but may cancel the sign-in.
   * `privacyPolicy` - URL to site's privacy policy.
-    When provided, a link
-    will be displayed in the sign-in dialog.
+    When provided, a link will be displayed in the sign-in dialog.
   * `termsOfService` - URL to site's terms of service.
-    When provided, a link will
-    be displayed in the sign-in dialog.
-  * `oncancel` - a callback that will be invoked if the user refuses to
-    share an identity with the site.
+    When provided, a link will be displayed in the sign-in dialog.
+  * `oncancel` - a callback that will be invoked if the user refuses to share an identity with the site.
 
 #### navigator.id.logout();
 
@@ -610,8 +589,7 @@ If the `document` DOM object disappears for any reason (unloading, closing, etc.
 
 If `params.loggedInEmail` is `undefined`, the User Agent SHOULD:
 
-* if `HISTORY(origin).loggedIn`, invoke `onlogin` callback for the identity `HISTORY(origin).id` (see
-othe fire either the `onlogin` or `onlogout`
+* if `HISTORY(origin).loggedIn`, invoke `onlogin` callback for the identity `HISTORY(origin).id` (see othe fire either the `onlogin` or `onlogout`
 The User Agent SHOULD determine whether `params.loggedInEmail` matches the User Agent's login state for the `document.location.origin`.
 
 If
