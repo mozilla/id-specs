@@ -1,10 +1,10 @@
 BrowserID
-=====
+=========
 
 This is the <em>Beta1</em> BrowserID specification, going live at <tt>https://login.persona.org</tt> in September 2012.
 
 Overview
--
+--------
 
 This specification, BrowserID, defines a mechanism for websites to request, from the user via her user-agent, a signed assertion of email-address ownership.
 Web sites can use this mechanism to register users on their first visit and log them back in on subsequent visits.
@@ -12,7 +12,7 @@ The trust path for these assertions of email-address ownership is federated: ind
 A fallback identity provider is provided to bootstrap users with email addresses at domains that do not yet support the protocol.
 
 Terms
--
+-----
 
 - Identity: an email address controlled by the user.
 
@@ -31,11 +31,11 @@ Terms
 - Backed Identity Assertion: an Identity Assertion combined with the requisite Identity Certificates that enable a Relying Party to fully verify the Identity Assertion.
 
 Objects / Messages
--
+------------------
 
 BrowserID defines messages using the [JavaScript Object Signing and Encryption (JOSE) specifications](http://www.ietf.org/dyn/wg/charter/jose-charter) for signing JSON-formatted objects.
 
-### Public Key ###
+### Public Key
 
 A BrowserID public key is based [JSON Web Key (JWK)](http://tools.ietf.org/html/draft-ietf-jose-json-web-key-01), but since that standard is in flux, we have chosen a readable variant, with explicit versioning:
 
@@ -76,7 +76,7 @@ When more than one key might represent the same entity, a key-value pair object 
      ....
 
 
-### Identity Certificate ###
+### Identity Certificate
 
 An Identity Certificate is a JSON Web Token (JWT) object with the following claims:
 
@@ -114,7 +114,7 @@ Which, when signed, becomes a base64url-encoded data structure which looks like 
     eyJpc3MiOiJicm93c2VyaWQub3JnIiwiZXhwIjoxM...
     hv5wVN0HPINUZlLi4SJo9RzJhMU5_6XZsltYWODDD...
 
-#### Locating the Public Key ####
+#### Locating the Public Key
 
 An Identity Certificate SHOULD reference, using the normal JWT mechanism, the <tt>kid</tt> of the public key that should be used for verification.
 This is indicated in the JWT header:
@@ -122,7 +122,7 @@ This is indicated in the JWT header:
     {"typ":"JWT", "alg":"RSA", "kid": "key-2011-04-29"}
 
 
-#### Chained Certificates ####
+#### Chained Certificates
 
 Most of the time, a certificate is used to bind a key to an identity.
 But in some cases, they are used to delegate certification authority to another key.
@@ -154,12 +154,12 @@ And a later certificate cannot extend the expiration time of an earlier certific
 
 Implementations MUST be VERY CAREFUL to avoid bugs in which only the next-to-last certificate is evaluated.
 
-#### JOSE Spec ####
+#### JOSE Spec
 
 The JOSE spec currently does not specify a certificate format beyond JWS signatures.
 If it eventually does, we will consider moving to it.
 
-### Identity Assertion ###
+### Identity Assertion
 
 An Identity Assertion is a JWT with the following claims:
 
@@ -180,7 +180,7 @@ and a payload of:
 
     {"exp":1320280579437, "aud":"http://localhost:10001"}
 
-### Backed Identity Assertion ###
+### Backed Identity Assertion
 
 A Backed Identity Assertion is a combination of an Identity Assertion and a sequence of Identity Certificates that verifiably tie the assertion to an issuing domain.
 This combination is expressed as a single string like this:
@@ -198,7 +198,7 @@ Most often, a backed identity assertion is a single certificate tying a public-k
 in which cert-1 has an "iss" of the issuing domain (e.g. "example.com"), a "publicKey" of the user's certified key, a "principal" of <tt>{"email": "user@example.com"}</tt>, and is signed by the example.com private key.
 The identityAssertion would have an "exp" and "aud" field, and is signed by the user's private key.
 
-### BrowserID Support Document ###
+### BrowserID Support Document
 
 A BrowserID support document MUST be a well-formed JSON document with at least these three fields: <tt>jwk</tt>, <tt>authentication</tt>, and <tt>provisioning</tt>.
 The document MAY contain additional JSON fields.
@@ -225,7 +225,7 @@ For example:
         "provisioning": "/browserid/provision.html"
      }
 
-#### BrowserID Delegated Support Document ####
+#### BrowserID Delegated Support Document
 
 A BrowserID delegated-support document MUST be a well-formed JSON document with at least one field: <tt>authority</tt>.
 This field MUST be a domain name.
@@ -238,7 +238,7 @@ For example:
 
 
 Web-Site Signin Flow
---
+--------------------
 
 <em>This section is informative.</em>
 
@@ -359,7 +359,7 @@ Will cause the `onlogout` callback passed to `navigator.id.watch()` to be invoke
 
 
 Identity Provisioning Flow
---
+--------------------------
 
 <em>This section is informative</em>
 
@@ -423,7 +423,8 @@ Once this is successfully completed, the user-agent returns to the BrowserID use
 By the end of this flow, Alice has obtained, within her user-agent, a certificate for her email address issued directly by her email address's domain.
 
 User-Agent Compliance
---
+---------------------
+
 <em>This section is normative.</em>
 
 The User-Agent plays an important role in BrowserID support.
@@ -440,7 +441,7 @@ A compliant BrowserID User-Agent MUST implement:
 * Generation of Identity-Backed Assertions
 * RP Authentication
 
-### Keypair and Certificate Storage ###
+### Keypair and Certificate Storage
 
 The User Agent MUST implement an internal store of keypairs and associated certificates.
 We denote `CERTS(identity)` for ease of specification.
@@ -453,7 +454,7 @@ Its value is either `undefined` or an object with properties:
 The User Agent MAY implement this keypair and certificate storage in a different manner, with a different interface.
 The User Agent SHOULD be careful to disclose the actual secret key in very few settings.
 
-### IdP Determination ###
+### IdP Determination
 
 The User Agent MUST be able to determine an IdP, designated by a domain name, for a given Identity.
 The User Agent MUST follow these steps:
@@ -466,11 +467,11 @@ The User Agent MUST follow these steps:
 * if the configuration is a proper BrowserID Delegated Support document, then proceed recursively with the configuration lookup process for the delegated domain, i.e. the value of the `authority` parameter.
 * otherwise, fail and use the Fallback IdP.
 
-#### Fallback IdP ####
+#### Fallback IdP
 
 The User Agent SHOULD use `browserid.org` as the IdP when IdP Determination proceeds in Fallback Mode.
 
-### IdP Provisioning ###
+### IdP Provisioning
 
 The User Agent MUST support a provisioning workflow when a user wants to authenticate with a new email address.
 A provisioning workflow is initiated with some context:
@@ -493,7 +494,7 @@ The User Agent MUST proceed as follows:
 
 * respond to the IdP API calls.
 
-#### `navigator.id.beginProvisioning(object callback)` ####
+#### `navigator.id.beginProvisioning(object callback)`
 
 The User Agent SHOULD expect the callback parameter to be a function.
 
@@ -521,7 +522,7 @@ The User Agent MUST store the value of `certificate` in `CERTS(identity).cert`
 
 The User Agent MUST proceed with Provisioning Soft-Fail.
 
-#### Provisioning Soft-Fail ####
+#### Provisioning Soft-Fail
 
 The User Agent SHOULD close the provisioning content frame.
 
@@ -529,7 +530,7 @@ If `CONTEXT.authenticationDone` is `true`, proceed with Provisioning Hard-Fail.
 
 Otherwise, set `CONTEXT.authenticationDone` to `true` and proceed with Authentication.
 
-#### Provisioning Hard-Fail ####
+#### Provisioning Hard-Fail
 
 The User Agent SHOULD close the provisioning content frame if this hasn't yet been done.
 
@@ -537,7 +538,7 @@ The User Agent MUST declare failure on identity provisioning.
 The User Agent SHOULD surface an error message to the user.
 The User Agent MAY allow the user to retry.
 
-### IdP Authentication ###
+### IdP Authentication
 
 The User Agent MUST support an authentication workflow using `CONTEXT` unchanged from the preceding Provisioning flow.
 
@@ -552,21 +553,21 @@ The User Agent MAY choose to limit the capabilities of this content frame in cer
 The User Agent MUST support the following API calls in this content frame when the content frame document location matches the origin of `IDP(CONTEXT.identity).authentication`.
 The User Agent SHOULD proceed to Authentication Hard-Fail if these calls are invoked from an origin that doesn't match.
 
-#### `navigator.id.beginAuthentication(object callback)` ####
+#### `navigator.id.beginAuthentication(object callback)`
 
 The User Agent SHOULD expect `callback` to be a function.
 
 The User Agent MUST invoke the callback asynchronously (i.e. after the call to `beginAuthentication` has returned) with `CONTEXT.identity` as single parameter.
 
-#### navigator.id.completeAuthentication(); ####
+#### navigator.id.completeAuthentication();
 
 The User Agent MUST invoke the Provisioning Flow, continuing with the existing `CONTEXT`.
 
-#### navigator.id.raiseAuthenticationFailure(string reason); ####
+#### navigator.id.raiseAuthenticationFailure(string reason);
 
 The User Agent MUST proceed to Provisioning Hard-Fail.
 
-#### WebIDL ####
+#### WebIDL
 
 <pre>
  module navigator {
@@ -584,7 +585,7 @@ The User Agent MUST proceed to Provisioning Hard-Fail.
 </pre>
 
 
-### Tracking User State ###
+### Tracking User State
 
 The User Agent MUST track the user's login state at various Web Origins, based on decisions the user made in the context of BrowserID-mediated logins, so that the following information is available to the User Agent when making decisions:
 
@@ -595,11 +596,11 @@ The User Agent MUST track the user's login state at various Web Origins, based o
 Note that the above data is denoted programmatically to make this specification easier to read.
 The data <em>MUST NOT</em> be available to web content.
 
-### Generating Identity-Backed Assertions ###
+### Generating Identity-Backed Assertions
 
 When
 
-### RP Authentication ###
+### RP Authentication
 
 The User Agent MUST offer the following APIs and behave as described in response to these calls.
 
@@ -651,7 +652,7 @@ XXX: should we provide error information if it's not just a user cancel?
 
 
 Primary Authority Compliance
---
+----------------------------
 
 <em>This section is normative.</em>
 
@@ -660,7 +661,7 @@ A primary authority MUST:
 * provide a user-authentication web flow
 * provide a user-key-certification web flow
 
-### Declaring Support and Parameters for BrowserID ###
+### Declaring Support and Parameters for BrowserID
 
 To declare support for BrowserID, a domain MUST publish either a BrowserID support document OR a BrowserID delegated-support document at a specific URI relative to the domain's SSL URI.
 The relative reference URI for this document is <tt>/.well-known/browserid</tt>, as per [RFC5785](https://tools.ietf.org/html/rfc5785).
@@ -670,7 +671,7 @@ The BrowserID support document (or delegated-support document) MUST be served wi
 
 The BrowserID support document (or delegated-support document) MAY be served with cache headers to indicate longevity of the BrowserID support parameters.
 
-### Authenticating Users ###
+### Authenticating Users
 
 A BrowserID-compliant domain MUST provide a user-authentication web flow starting at the URI referenced by the <tt>authentication</tt> field in its published BrowserID support document.
 The specifics of the user-authentication flow are up to the domain.
@@ -680,7 +681,7 @@ The flow SHOULD NOT use <tt>window.open()</tt> or other techniques that target n
 The authentication flow MUST complete at a URI relative to the BrowserID-compliant domain.
 The completion page content MUST include a JavaScript call to either <tt>navigator.id.completeAuthentication()</tt> if authentication was successful or <tt>navigator.id.raiseAuthenticationFailure()</tt> if the use cancelled authentication.
 
-### Certifying Users ###
+### Certifying Users
 
 A BrowserID-compliant domain MUST provider user-key-certification at the URI referenced by the <tt>provisioning</tt> field in its published BrowserID support document.
 
@@ -723,7 +724,7 @@ The domain's JavaScript MUST finally call:
 with the Identity Certificate string.
 
 Assertion Verification
--
+----------------------
 
 Backed Identity Assertions SHOULD NOT be verified in the client, in JavaScript or otherwise, since client runtimes may be altered to circumvent such verification.
 Instead, Backed Identity Assertions SHOULD be sent to a trusted server for verification.
@@ -746,7 +747,7 @@ In that case, the verification service MUST perform all the checks described her
 In order to perform audience checking, the verification service must be told what audience to expect by the relying party.
 
 Security Considerations
--
+-----------------------
 
 things to write about:
 
@@ -756,7 +757,7 @@ things to write about:
 * javascript implementations, good RNGs
 
 References
---
+----------
 
 * JWT: http://self-issued.info/docs/draft-jones-json-web-token-04.html
 * JWK: http://tools.ietf.org/html/draft-ietf-jose-json-web-key-01
