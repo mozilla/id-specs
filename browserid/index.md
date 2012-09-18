@@ -14,21 +14,31 @@ A fallback identity provider is provided to bootstrap users with email addresses
 Terms
 -----
 
-* Identity: an email address controlled by the user.
+<dl>
+  <dt>Identity</dt>
+  <dd>An email address controlled by the user.</dd>
 
-* Public Key: the public portion of an asymmetric cryptographic keypair used in a digital signature algorithm.
+  <dt>Public Key</dt>
+  <dd>The public portion of an asymmetric cryptographic keypair used in a digital signature algorithm.</dd>
 
-* Identity Certificate: a digitally signed statement that binds a given Public Key to a given Identity.
+  <dt>Identity Certificate</dt>
+  <dd>A digitally signed statement that binds a given Public Key to a given Identity.</dd>
 
-* Identity Provider: a signer of Identity Certificates for identities that are directly within this authority's domain, e.g. `example.com` certifies `*@example.com`.
+  <dt>Identity Provider</dt>
+  <dd>A signer of Identity Certificates for identities that are directly within this authority's domain, e.g. `example.com` certifies `*@example.com`.</dd>
 
-* Fallback Identity Provider: a signer of Identity Certificates for identities that are ''not'' directly within this authority's domain.
+  <dt>Fallback Identity Provider</dt>
+  <dd>A signer of Identity Certificates for identities that are ''not'' directly within this authority's domain.</dd>
 
-* Audience/Relying Party: a system, typically a web site, that needs to verify an Identity.
+  <dt>Audience/Relying Party</dt>
+  <dd>A system, typically a web site, that needs to verify an Identity.</dd>
 
-* Identity Assertion: a digitally signed statement indicating a request to login to a particular relying party.
+  <dt>Identity Assertion</dt>
+  <dd>A digitally signed statement indicating a request to login to a particular relying party.</dd>
 
-* Backed Identity Assertion: an Identity Assertion combined with the requisite Identity Certificates that enable a Relying Party to fully verify the Identity Assertion.
+  <dt>Backed Identity Assertion</dt>
+  <dd>An Identity Assertion combined with the requisite Identity Certificates that enable a Relying Party to fully verify the Identity Assertion.</dd>
+</dl>
 
 Objects / Messages
 ------------------
