@@ -1,7 +1,7 @@
 BrowserID
 =========
 
-This is the <em>Beta1</em> BrowserID specification, going live at <tt>https://login.persona.org</tt> in September 2012.
+This is the _Beta1_ BrowserID specification, going live at `https://login.persona.org` in September 2012.
 
 Overview
 --------
@@ -20,7 +20,7 @@ Terms
 
 - Identity Certificate: a digitally signed statement that binds a given Public Key to a given Identity.
 
-- Identity Provider: a signer of Identity Certificates for identities that are directly within this authority's domain, e.g. <tt>example.com</tt> certifies <tt>*@example.com</tt>.
+- Identity Provider: a signer of Identity Certificates for identities that are directly within this authority's domain, e.g. `example.com` certifies `*@example.com`.
 
 - Fallback Identity Provider: a signer of Identity Certificates for identities that are ''not'' directly within this authority's domain.
 
@@ -52,13 +52,13 @@ A BrowserID public key is based [JSON Web Key (JWK)](http://tools.ietf.org/html/
 
 This structure includes:
 
-* <tt>version</tt> a version field, set to <tt>2012.08.15</tt> for the BrowserID Beta data format version.
-* <tt>algorithm</tt> the algorithm for which this key was generated, using JOSE taxonomy
-* additional fields specified by the algorithm, e.g. <tt>modulus</tt> and <tt>exponent</tt> for RSA public keys.
-* <tt>kid</tt> an optional key identifier, which will be matched against the "kid" field in JWS signature objects.
+* `version` a version field, set to `2012.08.15` for the BrowserID Beta data format version.
+* `algorithm` the algorithm for which this key was generated, using JOSE taxonomy
+* additional fields specified by the algorithm, e.g. `modulus` and `exponent` for RSA public keys.
+* `kid` an optional key identifier, which will be matched against the "kid" field in JWS signature objects.
   The format is arbitrary, but some sort of generation-number or date is commonly used to facilitate key rotation.
 
-When more than one key might represent the same entity, a key-value pair object of cryptographic keys is used, and the <tt>kid</tt> is specified as the key of that key-value pair, rather than inside the object.
+When more than one key might represent the same entity, a key-value pair object of cryptographic keys is used, and the `kid` is specified as the key of that key-value pair, rather than inside the object.
 
      ....
      "publicKeys": {
@@ -80,10 +80,10 @@ When more than one key might represent the same entity, a key-value pair object 
 
 An Identity Certificate is a JSON Web Token (JWT) object with the following claims:
 
-* <tt>exp</tt> the expiration as per JWT
-* <tt>iss</tt> the domain of the issuer as per JWT
-* <tt>publicKey</tt> the serialized public key as defined above
-* <tt>principal</tt> the principal being certified.
+* `exp` the expiration as per JWT
+* `iss` the domain of the issuer as per JWT
+* `publicKey` the serialized public key as defined above
+* `principal` the principal being certified.
 
 The principal is a JSON object that indicates the type of principal, e.g.
 
@@ -116,7 +116,7 @@ Which, when signed, becomes a base64url-encoded data structure which looks like 
 
 #### Locating the Public Key
 
-An Identity Certificate SHOULD reference, using the normal JWT mechanism, the <tt>kid</tt> of the public key that should be used for verification.
+An Identity Certificate SHOULD reference, using the normal JWT mechanism, the `kid` of the public key that should be used for verification.
 This is indicated in the JWT header:
 
     {"typ":"JWT", "alg":"RSA", "kid": "key-2011-04-29"}
@@ -126,7 +126,7 @@ This is indicated in the JWT header:
 
 Most of the time, a certificate is used to bind a key to an identity.
 But in some cases, they are used to delegate certification authority to another key.
-For example, the <tt>example.com</tt> IdP might publish a single master key, but have separate working keys for a number of load-balanced servers.
+For example, the `example.com` IdP might publish a single master key, but have separate working keys for a number of load-balanced servers.
 Each server will be granted a certificate that authorizes its individual key to speak for the the whole example.com domain.
 
 There can be multiple levels of delegation between the initial issuer key and the final assertion.
@@ -145,7 +145,7 @@ To allow chaining, a certificate must include:
       "allowChaining": true
     ...
 
-The following fields are considered in the certificate chain verification: <tt>principal</tt>, <tt>exp</tt>.
+The following fields are considered in the certificate chain verification: `principal`, `exp`.
 These constraints are combined.
 A principal indicating an email address is considered a subset of a principal for the corresponding domain.
 A principal must be included in any certificate, or it is assumed that the null principal is being certified, and that chain becomes useless.
@@ -163,8 +163,8 @@ If it eventually does, we will consider moving to it.
 
 An Identity Assertion is a JWT with the following claims:
 
-* <tt>exp</tt> for expiration
-* <tt>aud</tt> for the relying party (audience.)
+* `exp` for expiration
+* `aud` for the relying party (audience.)
 
 An assertion might look like (with line breaks for readability):
 
@@ -195,19 +195,19 @@ Most often, a backed identity assertion is a single certificate tying a public-k
 
     <cert-1>~<identityAssertion>
 
-in which cert-1 has an "iss" of the issuing domain (e.g. "example.com"), a "publicKey" of the user's certified key, a "principal" of <tt>{"email": "user@example.com"}</tt>, and is signed by the example.com private key.
+in which cert-1 has an "iss" of the issuing domain (e.g. "example.com"), a "publicKey" of the user's certified key, a "principal" of `{"email": "user@example.com"}`, and is signed by the example.com private key.
 The identityAssertion would have an "exp" and "aud" field, and is signed by the user's private key.
 
 ### BrowserID Support Document
 
-A BrowserID support document MUST be a well-formed JSON document with at least these three fields: <tt>jwk</tt>, <tt>authentication</tt>, and <tt>provisioning</tt>.
+A BrowserID support document MUST be a well-formed JSON document with at least these three fields: `jwk`, `authentication`, and `provisioning`.
 The document MAY contain additional JSON fields.
 
-The value of the <tt>jwk</tt> field MUST be a JWK object as described above, with <tt>kid</tt> specified for all keys.
+The value of the `jwk` field MUST be a JWK object as described above, with `kid` specified for all keys.
 
-The value of the <tt>authentication</tt> field MUST be a relative reference to a URI, as defined by [RFC3986](https://tools.ietf.org/html/rfc3986).
+The value of the `authentication` field MUST be a relative reference to a URI, as defined by [RFC3986](https://tools.ietf.org/html/rfc3986).
 
-The value of the <tt>provisioning</tt> field MUST also be a relative reference to a URI.
+The value of the `provisioning` field MUST also be a relative reference to a URI.
 
 For example:
 
@@ -227,7 +227,7 @@ For example:
 
 #### BrowserID Delegated Support Document
 
-A BrowserID delegated-support document MUST be a well-formed JSON document with at least one field: <tt>authority</tt>.
+A BrowserID delegated-support document MUST be a well-formed JSON document with at least one field: `authority`.
 This field MUST be a domain name.
 
 For example:
@@ -240,7 +240,7 @@ For example:
 Web-Site Signin Flow
 --------------------
 
-<em>This section is informative.</em>
+_This section is informative._
 
 The BrowserID JavaScript API can be used by web sites to implement
 authentication.
@@ -361,16 +361,16 @@ Will cause the `onlogout` callback passed to `navigator.id.watch()` to be invoke
 Identity Provisioning Flow
 --------------------------
 
-<em>This section is informative</em>
+_This section is informative._
 
-Consider Alice, a user of <tt>EyeDee.me</tt>, with email address <tt>alice@eyedee.me</tt>.
-Alice wishes to use her <tt>alice@eyedee.me</tt> identity to log into web sites that support the BrowserID protocol:
+Consider Alice, a user of `EyeDee.me`, with email address `alice@eyedee.me`.
+Alice wishes to use her `alice@eyedee.me` identity to log into web sites that support the BrowserID protocol:
 
-* Alice visits <tt>example.com</tt> and clicks "login."
-* In the BrowserID interface, Alice types her email address <tt>alice@eyedee.me</tt>.
-* The user-agent checks <tt>https://eyedee.me/.well-known/browserid</tt> and determines that <tt>eyedee.me</tt> supports BrowserID.
+* Alice visits `example.com` and clicks "login."
+* In the BrowserID interface, Alice types her email address `alice@eyedee.me`.
+* The user-agent checks `https://eyedee.me/.well-known/browserid` and determines that `eyedee.me` supports BrowserID.
   From this configuration file it determines the provisioning and authentication URLs.
-* The user-agent loads, in an invisible IFRAME, the provisioning URL <tt>https://eyedee.me/browserid/provision.html</tt>, delivering to that URL any cookies that have previously been set and making available to that page's JavaScript any <tt>localStorage</tt> that corresponds to the <tt>eyedee.me</tt> origin.
+* The user-agent loads, in an invisible IFRAME, the provisioning URL `https://eyedee.me/browserid/provision.html`, delivering to that URL any cookies that have previously been set and making available to that page's JavaScript any `localStorage` that corresponds to the `eyedee.me` origin.
 * The provisioning URL's script determines if Alice is properly authenticated and, if so, triggers key generation within the user agent, obtains the public key, signs it, and registers the resulting certificate with the user agent:
 
 <pre>
@@ -397,7 +397,7 @@ Alice wishes to use her <tt>alice@eyedee.me</tt> identity to log into web sites 
  });
 </pre>
 
-* If Alice is not properly authenticated, the user agent loads the authentication URL <tt>https://eyedee.me/browserid/authenticate.html</tt> in a dialog interface, where Alice can then proceed to log into <tt>EyeDee.me</tt> using whatever flow/method EyeDee.me wishes.
+* If Alice is not properly authenticated, the user agent loads the authentication URL `https://eyedee.me/browserid/authenticate.html` in a dialog interface, where Alice can then proceed to log into `EyeDee.me` using whatever flow/method EyeDee.me wishes.
 
 <pre>
  // set up UI
@@ -418,14 +418,14 @@ Alice wishes to use her <tt>alice@eyedee.me</tt> identity to log into web sites 
 
 Once this is successfully completed, the user-agent returns to the BrowserID user-interface, and attempts to load the provisioning URL as in the previous step.
 
-* Once a certificate for <tt>alice@eyedee.me</tt> is installed, the user-agent completes the login to <tt>example.com</tt> by creating an assertion and delivering it to <tt>example.com</tt> as in the Main Protocol Flow above.
+* Once a certificate for `alice@eyedee.me` is installed, the user-agent completes the login to `example.com` by creating an assertion and delivering it to `example.com` as in the Main Protocol Flow above.
 
 By the end of this flow, Alice has obtained, within her user-agent, a certificate for her email address issued directly by her email address's domain.
 
 User-Agent Compliance
 ---------------------
 
-<em>This section is normative.</em>
+_This section is normative._
 
 The User-Agent plays an important role in BrowserID support.
 We define, normatively, the API and behaviors of a conforming BrowserID-enabled user agent.
@@ -478,7 +478,7 @@ A provisioning workflow is initiated with some context:
 
 * the identity address being provisioned, e.g. `alice@example.com`
 * security level of the session (user's own computer, shared computer, public computer, ...)
-* whether the authentication workflow has been invoked yet for this provisioning workflow (initially <tt>false</tt>).
+* whether the authentication workflow has been invoked yet for this provisioning workflow (initially `false`).
 
 We denote these `CONTEXT.identity`, `CONTEXT.securityLevel`, and `CONTEXT.authenticationDone`.
 
@@ -500,7 +500,7 @@ The User Agent SHOULD expect the callback parameter to be a function.
 
 The User Agent MUST invoke the callback asynchronously (i.e. after the call to `beginProvisioning` has returned) with parameters `CONTEXT.identity` and `CONTEXT.certValidityDuration`.
 
-<tt>navigator.id.genKeyPair(object callback);</tt>
+`navigator.id.genKeyPair(object callback);`
 
 The User Agent MUST proceed to Provisioning Hard-Fail if this API call is made before `navigator.id.beginProvisioning`.
 
@@ -508,9 +508,9 @@ The User Agent SHOULD expect the callback parameter to be a function.
 
 The User Agent MUST generate a fresh keypair associated with the email address for this provisioning context.
 The secret key should be stored as `CERTS(identity)` where `CERTS(identity.cert` remains `undefined` for now.
-The User Agent MUST invoke <tt>callback</tt> with, as its single argument, `CERTS(identity).publicKey` serialized as a string.
+The User Agent MUST invoke `callback` with, as its single argument, `CERTS(identity).publicKey` serialized as a string.
 
-<tt>navigator.id.registerCertificate(certificate);</tt>
+`navigator.id.registerCertificate(certificate);`
 
 The User Agent MUST proceed to Provisioning Hard-Fail if this API call is made before `navigator.id.genKeyPair`.
 
@@ -518,7 +518,7 @@ If `certificate` is not a valid serialized JSON Certificate, or if the trust-roo
 
 The User Agent MUST store the value of `certificate` in `CERTS(identity).cert`
 
-<tt>navigator.id.raiseProvisioningFailure(string reason);</tt>
+`navigator.id.raiseProvisioningFailure(string reason);`
 
 The User Agent MUST proceed with Provisioning Soft-Fail.
 
@@ -594,7 +594,7 @@ The User Agent MUST track the user's login state at various Web Origins, based o
 * `HISTORY(origin).lastLogin` is a `Date` of the last time the user logged into the origin, or `undefined` if never.
 
 Note that the above data is denoted programmatically to make this specification easier to read.
-The data <em>MUST NOT</em> be available to web content.
+The data _MUST NOT_ be available to web content.
 
 ### Generating Identity-Backed Assertions
 
@@ -636,17 +636,17 @@ the email last used on that site.
  - check that the associated certificate is still valid.
    If not, initiate a provisioning workflow for that Identity, then continue once it returns successfully.
  - generate an Identity Assertion using the requesting site's origin as audience and the current time.
-   Bundle with the associated certificate to create a Backed Identity Assertion, and fire a <tt>login</tt> event on the <tt>navigator.id</tt> object with a serialization of the Backed Identity Assertion in the <tt>assertion</tt> field of the event, then terminate the login workflow.
+   Bundle with the associated certificate to create a Backed Identity Assertion, and fire a `login` event on the `navigator.id` object with a serialization of the Backed Identity Assertion in the `assertion` field of the event, then terminate the login workflow.
 1. If no Identities are known, or if the user wishes to use a new Identity, the User Agent should prompt the user for this new identity and use it to initiate a Provisioning workflow (see below).
 Once provisioning has completed, the User Agent SHOULD present the updated list of identities to the user.
-1. If, at any point, the user cancels the login process, fire a <tt>logincanceled</tt> event on the <tt>navigator.id</tt> object and terminate the login workflow.
+1. If, at any point, the user cancels the login process, fire a `logincanceled` event on the `navigator.id` object and terminate the login workflow.
 
-By the end of the process, the User Agent MUST fire one of two events on the <tt>navigator.id</tt> object:
+By the end of the process, the User Agent MUST fire one of two events on the `navigator.id` object:
 
-* A <tt>loginCancelled</tt> event if the user chose not to log in.
+* A `loginCancelled` event if the user chose not to log in.
 
-* A <tt>login</tt> event if the user chose to log in.
-  This event MUST include the Backed Identity Assertion in the <tt>assertion</tt> property.
+* A `login` event if the user chose to log in.
+  This event MUST include the Backed Identity Assertion in the `assertion` property.
 
 XXX: should we provide error information if it's not just a user cancel?
 
@@ -654,7 +654,7 @@ XXX: should we provide error information if it's not just a user cancel?
 Primary Authority Compliance
 ----------------------------
 
-<em>This section is normative.</em>
+_This section is normative._
 
 A primary authority MUST:
 * declare support and parameters for BrowserID
@@ -664,26 +664,26 @@ A primary authority MUST:
 ### Declaring Support and Parameters for BrowserID
 
 To declare support for BrowserID, a domain MUST publish either a BrowserID support document OR a BrowserID delegated-support document at a specific URI relative to the domain's SSL URI.
-The relative reference URI for this document is <tt>/.well-known/browserid</tt>, as per [RFC5785](https://tools.ietf.org/html/rfc5785).
+The relative reference URI for this document is `/.well-known/browserid`, as per [RFC5785](https://tools.ietf.org/html/rfc5785).
 The domain MAY choose to reference this BrowserID support document from a host-meta file (as per RFC5785).
 
-The BrowserID support document (or delegated-support document) MUST be served with Content-Type <tt>application/json</tt>.
+The BrowserID support document (or delegated-support document) MUST be served with Content-Type `application/json`.
 
 The BrowserID support document (or delegated-support document) MAY be served with cache headers to indicate longevity of the BrowserID support parameters.
 
 ### Authenticating Users
 
-A BrowserID-compliant domain MUST provide a user-authentication web flow starting at the URI referenced by the <tt>authentication</tt> field in its published BrowserID support document.
+A BrowserID-compliant domain MUST provide a user-authentication web flow starting at the URI referenced by the `authentication` field in its published BrowserID support document.
 The specifics of the user-authentication flow are up to the domain.
 The flow MAY use redirects to other pages, even other domains, to complete the user authentication process.
-The flow SHOULD NOT use <tt>window.open()</tt> or other techniques that target new windows/tabs.
+The flow SHOULD NOT use `window.open()` or other techniques that target new windows/tabs.
 
 The authentication flow MUST complete at a URI relative to the BrowserID-compliant domain.
-The completion page content MUST include a JavaScript call to either <tt>navigator.id.completeAuthentication()</tt> if authentication was successful or <tt>navigator.id.raiseAuthenticationFailure()</tt> if the use cancelled authentication.
+The completion page content MUST include a JavaScript call to either `navigator.id.completeAuthentication()` if authentication was successful or `navigator.id.raiseAuthenticationFailure()` if the use cancelled authentication.
 
 ### Certifying Users
 
-A BrowserID-compliant domain MUST provider user-key-certification at the URI referenced by the <tt>provisioning</tt> field in its published BrowserID support document.
+A BrowserID-compliant domain MUST provider user-key-certification at the URI referenced by the `provisioning` field in its published BrowserID support document.
 
 The domain SHOULD deliver HTML and JavaScript at that URI, which it can expect to be evaluated in a standard user-agent IFRAME.
 
@@ -694,27 +694,27 @@ The domain MUST call, in JavaScript:
 <pre>
 navigator.id.beginProvisioning(provisionEmailFunction);
 </pre>
-with <tt>provisionEmailFunction</tt> a function that accepts an email address and a certificate validity duration as parameters.
+with `provisionEmailFunction` a function that accepts an email address and a certificate validity duration as parameters.
 
 Once the email address determined, the domain SHOULD check that the user is properly authenticated to use this email address.
 If she isn't, the domain SHOULD call
 <pre>
  navigator.id.raiseProvisioningFailure(explanation)
 </pre>
-with <tt>explanation</tt> a string explaining the failure.
+with `explanation` a string explaining the failure.
 The domain SHOULD concludes all JavaScript activity after making this call.
 
-You SHOULD use one of the following <tt>explanation</tt> codes:
-* <tt>user is not authenticated as target user</tt> - Indicates UA should show sign in screen again, due to an error
+You SHOULD use one of the following `explanation` codes:
+* `user is not authenticated as target user` - Indicates UA should show sign in screen again, due to an error
 
 If the user is properly authenticated, the domain MUST call:
 <pre>
  navigator.id.genKeyPair(gotPublicKey);
 </pre>
-with <tt>gotPublicKey</tt> a function that accepts a JWK-string-formatted public-key.
+with `gotPublicKey` a function that accepts a JWK-string-formatted public-key.
 
 The domain's JavaScript SHOULD then send this JWK string to the domain's backend server.
-The domain's backend server SHOULD certify this key along with the email address provided to its <tt>provisionEmailFunction</tt> function, and an expiration date at least 1 minutes in the future.
+The domain's backend server SHOULD certify this key along with the email address provided to its `provisionEmailFunction` function, and an expiration date at least 1 minutes in the future.
 The backend server SHOULD NOT issue a certificate valid longer than 24 hours.
 The domain's backend server SHOULD then deliver an Identity Certificate back to its JavaScript context.
 The domain's JavaScript MUST finally call:
@@ -731,16 +731,16 @@ Instead, Backed Identity Assertions SHOULD be sent to a trusted server for verif
 
 To verify a Backed Identity Assertion, a Relying Party SHOULD perform the following checks:
 
-1. If the <tt>exp</tt> date of the assertion is earlier than the current time by more than a certain interval, the assertion has expired and must be rejected.
+1. If the `exp` date of the assertion is earlier than the current time by more than a certain interval, the assertion has expired and must be rejected.
 A Relying Party MAY choose the length of that interval, though it is recommended that it be less than 5 minutes.
-1. If the <tt>audience</tt> field of the assertion does not match the Relying Party's origin (including scheme and optional non-standard port), reject the assertion.
+1. If the `audience` field of the assertion does not match the Relying Party's origin (including scheme and optional non-standard port), reject the assertion.
 A domain that includes the standard port, of 80 for HTTP and 443 for HTTPS, SHOULD be treated as equivalent to a domain that matches the protocol but does not include the port.
 (XXX: Can we find an RFC that defines this equality test?)
 1. If the Identity Assertion's signature does not verify against the public-key within the last Identity Certificate, reject the assertion.
 1. If there is more than one Identity Certificate, then reject the assertion unless each certificate after the first one is properly signed by the prior certificate's public key.
 1. If the first certificate (or only certificate when there is only one) is not properly signed by the expected issuer's public key, reject the assertion.
 The expected issuer is either the domain of the certified email address in the last certificate, or the issuer listed in the first certificate if the email-address domain does not support BrowserID.
-1. If the expected issuer was designated by the certificate rather than discovered given the user's email address, then the issuer SHOULD be <tt>browserid.org</tt>, otherwise reject the assertion.
+1. If the expected issuer was designated by the certificate rather than discovered given the user's email address, then the issuer SHOULD be `browserid.org`, otherwise reject the assertion.
 
 Note that a relying party may, at its discretion, use a verification service that performs these steps and returns a summary of results.
 In that case, the verification service MUST perform all the checks described here.
