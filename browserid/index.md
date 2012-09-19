@@ -43,126 +43,81 @@ Terms
 Objects / Messages
 ------------------
 
-BrowserID defines messages using the [JavaScript Object Signing and Encryption (JOSE) specifications](http://www.ietf.org/dyn/wg/charter/jose-charter) for signing JSON-formatted objects.
+When possible, BrowserID defines messages using the [JavaScript Object Signing and Encryption (JOSE) specifications](http://www.ietf.org/dyn/wg/charter/jose-charter) for signing JSON-formatted objects.
+However, because JOSE is still in active development, and due to historical accidents, the BrowserID protocol makes decisions that may diverge from the current JOSE spec.
+Later versions of the protocol are expected to match JOSE more closely.
+
+Future messages will contain a "version" property to distinguish their format from this initial specification.
+
 
 ### Public Key
 
-A BrowserID public key is based [JSON Web Key (JWK)](http://tools.ietf.org/html/draft-ietf-jose-json-web-key-01), but since that standard is in flux, we have chosen a readable variant, with explicit versioning:
+A BrowserID public key is based [JSON Web Key (JWK)](http://tools.ietf.org/html/draft-ietf-jose-json-web-key-01), but that standard is in flux.
+The current format looks like:
 
-       {"version": "2012.08.15",
-        "algorithm":"RSA",
-        "modulus": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx
-    4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMs
-    tn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2
-    QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbI
-    SD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqb
-    w0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
-        "exponent":"AQAB",
-        "kid":"key-2011-04-29"}
+    { "algorithm": "RS",
+      "n": "15498874758090276039465094105837231567265546373975960480941122651107772824121527483107402353899846252489837024870191707394743196399582959425513904762996756672089693541009892030848825079649783086005554442490232900875792851786203948088457942416978976455297428077460890650409549242124655536986141363719589882160081480785048965686285142002320767066674879737238012064156675899512503143225481933864507793118457805792064445502834162315532113963746801770187685650408560424682654937744713813773896962263709692724630650952159596951348264005004375017610441835956073275708740239518011400991972811669493356682993446554779893834303",
+      "e": "65537"
+    }
+
+or:
+
+    { algorithm": "DS",
+      "g": "c52a4a0ff3b7e61fdf1867ce84138369a6154f4afa92966e3c827e25cfa6cf508b90e5de419e1337e07a2e9e2a3cd5dea704d175f8ebf6af397d69e110b96afb17c7a03259329e4829b0d03bbc7896b15b4ade53e130858cc34d96269aa89041f409136c7242a38895c9d5bccad4f389af1d7a4bd1398bd072dffa896233397a",
+      "p": "ff600483db6abfc5b45eab78594b3533d550d9f1bf2a992a7a8daa6dc34f8045ad4e6e0c429d334eeeaaefd7e23d4810be00e4cc1492cba325ba81ff2d5a5b305a8d17eb3bf4a06a349d392e00d329744a5179380344e82a18c47933438f891e22aeef812d69c8f75e326cb70ea000c3f776dfdbd604638c2ef717fc26d02e17",
+      "q": "e21e04f911d1ed7991008ecaab3bf775984309c3",
+      "y": "2b0b6f44f58ec4fd5043be6c68433bc839bb867276f90a9c7a68071097167d2cab2df53aa5ae928843d15a42412123ee24c4067d7b8587850d1f09fa39cc5bb52f8b8844c3132440f2e455aea8235535b28a8f01588209f145ee1f265257fe9999bc90547ba985052ad4fb320fb9153878164bf3572dc5c4fe493e66506f2b04"
+    }
 
 This structure includes:
 
-* `version` a version field, set to `2012.08.15` for the BrowserID Beta data format version.
-* `algorithm` the algorithm for which this key was generated, using JOSE taxonomy
-* additional fields specified by the algorithm, e.g. `modulus` and `exponent` for RSA public keys.
-* `kid` an optional key identifier, which will be matched against the "kid" field in JWS signature objects.
-  The format is arbitrary, but some sort of generation-number or date is commonly used to facilitate key rotation.
-
-When more than one key might represent the same entity, a key-value pair object of cryptographic keys is used, and the `kid` is specified as the key of that key-value pair, rather than inside the object.
-
-     ....
-     "publicKeys": {
-       "key-2011-04-29":
-           {"version": "2012.08.15",
-            "algorithm":"RSA",
-            "modulus": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx
-                4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMs
-                tn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2
-                QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbI
-                SD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqb
-                w0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
-            "exponent":"AQAB"}
-       }
-     ....
-
+* `algorithm` the algorithm for which this key was generated, using JOSE taxonomy (`RS` or `DS`)
+* additional fields specified by the algorithm, e.g. RSA keys use decimal `n` for the modulus and `e` for the exponent, DSA keys use hex `g`, `p`, `q`, and `y`.
 
 ### Identity Certificate
 
-An Identity Certificate is a JSON Web Token (JWT) object with the following claims:
+An Identity Certificate is a signed JSON Web Token (JWT)-like object.
+This starts with a JWT Header.
+BrowserID currently omits the `typ` field in the JWT Header, so a typical header looks like:
 
-* `exp` the expiration as per JWT
+    {"alg": "RS256"}
+
+This indicates that the Identity Certificate is signed by an RSA key with a 256-bit security level (i.e. 2048-bit modulus).
+
+The JWT Claims Set contains the following claims:
+
+* `iat`: the "issued-at" time, when the certificate becomes valid (in milliseconds-since-epoch)
+* `exp`: the expiration time, as per JWT, when the certificate ceases being valid (milliseconds-since-epoch)
 * `iss` the domain of the issuer as per JWT
-* `publicKey` the serialized public key as defined above
+* `public-key` the serialized public key as defined above
 * `principal` the principal being certified.
 
-The principal is a JSON object that indicates the type of principal, e.g.
+The principal is a JSON object that indicates the type of principal.
+The only value currently accepted is an email address, e.g.
 
     {"email": "bob@example.com"}
-
-or to specify a domain but not yet a user:
-
-    {"domain": "example.com"}
 
 A complete JWT set of claims then looks like:
 
     {
-      "iss": "example.com",
-      "exp": "1313971280961",
-      "publicKey": {
-        "version": "2012.08.15",
-        "algorithm":"RSA",
-        "modulus": "0vx7agoebGcQSu...",
-        "exponent":"AQAB"},
-      "principal": {
-        "email": "john@example.com"
+      "iss": "mockmyid.com",
+      "iat": 1347994401401,
+      "exp": 1347998001401,
+      "principal": {"email": "warner@mockmyid.com"},
+      "public-key": {
+        "algorithm": "DS",
+        "g": "c52a4a0ff3b7e61fdf1867ce84138369a6154f4afa92966e3c827e25cfa6cf508b90e5de419e1337e07a2e9e2a3cd5dea704d175f8ebf6af397d69e110b96afb17c7a03259329e4829b0d03bbc7896b15b4ade53e130858cc34d96269aa89041f409136c7242a38895c9d5bccad4f389af1d7a4bd1398bd072dffa896233397a",
+        "p": "ff600483db6abfc5b45eab78594b3533d550d9f1bf2a992a7a8daa6dc34f8045ad4e6e0c429d334eeeaaefd7e23d4810be00e4cc1492cba325ba81ff2d5a5b305a8d17eb3bf4a06a349d392e00d329744a5179380344e82a18c47933438f891e22aeef812d69c8f75e326cb70ea000c3f776dfdbd604638c2ef717fc26d02e17",
+        "q": "e21e04f911d1ed7991008ecaab3bf775984309c3",
+        "y": "2b0b6f44f58ec4fd5043be6c68433bc839bb867276f90a9c7a68071097167d2cab2df53aa5ae928843d15a42412123ee24c4067d7b8587850d1f09fa39cc5bb52f8b8844c3132440f2e455aea8235535b28a8f01588209f145ee1f265257fe9999bc90547ba985052ad4fb320fb9153878164bf3572dc5c4fe493e66506f2b04"
       }
     }
 
-Which, when signed, becomes a base64url-encoded data structure which looks like the following (with linebreaks and truncated values for for easier reading; the full string has exactly two periods and no whitespace):
+Which, when signed, becomes a base64url-encoded data structure which looks like the following (with linebreaks added for easier reading; the full string has exactly two periods and no whitespace):
 
-    eyJhbGciOiAiUlMyNTYiLCAidHlwIjogIkpXVCJ9.
-    eyJpc3MiOiJicm93c2VyaWQub3JnIiwiZXhwIjoxM...
-    hv5wVN0HPINUZlLi4SJo9RzJhMU5_6XZsltYWODDD...
-
-#### Locating the Public Key
-
-An Identity Certificate SHOULD reference, using the normal JWT mechanism, the `kid` of the public key that should be used for verification.
-This is indicated in the JWT header:
-
-    {"typ":"JWT", "alg":"RSA", "kid": "key-2011-04-29"}
-
-
-#### Chained Certificates
-
-Most of the time, a certificate is used to bind a key to an identity.
-But in some cases, they are used to delegate certification authority to another key.
-For example, the `example.com` IdP might publish a single master key, but have separate working keys for a number of load-balanced servers.
-Each server will be granted a certificate that authorizes its individual key to speak for the the whole example.com domain.
-
-There can be multiple levels of delegation between the initial issuer key and the final assertion.
-The term "certificate chain" is used to describe this sequence of certificates, in which the first n-1 certificates delegate authority to the next, and the final certificate authorizes a specific key to speak for a specific identity (i.e. binds a key to an identity).
-
-Certificate delegation is tricky and potentially opens up avenues for attacks.
-Thus, we take two important precautions:
-
-* by default, a certificate chain cannot be extended, unless the last certificate is explicitly designated as allowing chaining.
-
-* certificate grants are subtractive: once a chain is contrained to a principal, its scope can no longer be broadened.
-
-To allow chaining, a certificate must include:
-
-    ...
-    "allowChaining": true
-    ...
-
-The following fields are considered in the certificate chain verification: `principal`, `exp`.
-These constraints are combined.
-A principal indicating an email address is considered a subset of a principal for the corresponding domain.
-A principal must be included in any certificate, or it is assumed that the null principal is being certified, and that chain becomes useless.
-A later certificate cannot certify a principal that isn't included within an earlier certificate.
-And a later certificate cannot extend the expiration time of an earlier certificate in a chain.
-
-Implementations MUST be VERY CAREFUL to avoid bugs in which only the next-to-last certificate is evaluated.
+    eyJhbGciOiJSUzI1NiJ9
+    .eyJwdWJsaWMta2V5Ijp7ImFsZ29yaXRobSI6IkRTIiwieSI6IjJiMGI2ZjQ0ZjU4ZWM0ZmQ1MDQzYmU2YzY4NDMzYmM4MzliYjg2NzI3NmY5MGE5YzdhNjgwNzEwOTcxNjdkMmNhYjJkZjUzYWE1YWU5Mjg4NDNkMTVhNDI0MTIxMjNlZTI0YzQwNjdkN2I4NTg3ODUwZDFmMDlmYTM5Y2M1YmI1MmY4Yjg4NDRjMzEzMjQ0MGYyZTQ1NWFlYTgyMzU1MzViMjhhOGYwMTU4ODIwOWYxNDVlZTFmMjY1MjU3ZmU5OTk5YmM5MDU0N2JhOTg1MDUyYWQ0ZmIzMjBmYjkxNTM4NzgxNjRiZjM1NzJkYzVjNGZlNDkzZTY2NTA2ZjJiMDQiLCJwIjoiZmY2MDA0ODNkYjZhYmZjNWI0NWVhYjc4NTk0YjM1MzNkNTUwZDlmMWJmMmE5OTJhN2E4ZGFhNmRjMzRmODA0NWFkNGU2ZTBjNDI5ZDMzNGVlZWFhZWZkN2UyM2Q0ODEwYmUwMGU0Y2MxNDkyY2JhMzI1YmE4MWZmMmQ1YTViMzA1YThkMTdlYjNiZjRhMDZhMzQ5ZDM5MmUwMGQzMjk3NDRhNTE3OTM4MDM0NGU4MmExOGM0NzkzMzQzOGY4OTFlMjJhZWVmODEyZDY5YzhmNzVlMzI2Y2I3MGVhMDAwYzNmNzc2ZGZkYmQ2MDQ2MzhjMmVmNzE3ZmMyNmQwMmUxNyIsInEiOiJlMjFlMDRmOTExZDFlZDc5OTEwMDhlY2FhYjNiZjc3NTk4NDMwOWMzIiwiZyI6ImM1MmE0YTBmZjNiN2U2MWZkZjE4NjdjZTg0MTM4MzY5YTYxNTRmNGFmYTkyOTY2ZTNjODI3ZTI1Y2ZhNmNmNTA4YjkwZTVkZTQxOWUxMzM3ZTA3YTJlOWUyYTNjZDVkZWE3MDRkMTc1ZjhlYmY2YWYzOTdkNjllMTEwYjk2YWZiMTdjN2EwMzI1OTMyOWU0ODI5YjBkMDNiYmM3ODk2YjE1YjRhZGU1M2UxMzA4NThjYzM0ZDk2MjY5YWE4OTA0MWY0MDkxMzZjNzI0MmEzODg5NWM5ZDViY2NhZDRmMzg5YWYxZDdhNGJkMTM5OGJkMDcyZGZmYTg5NjIzMzM5N2EifSwicHJpbmNpcGFsIjp7ImVtYWlsIjoid2FybmVyQG1vY2tteWlkLmNvbSJ9LCJpYXQiOjEzNDc5OTQ0MDE0MDEsImV4cCI6MTM0Nzk5ODAwMTQwMSwiaXNzIjoibW9ja215aWQuY29tIn0
+    .ddZEPpT3E1BdZfOLABoRZhvnKidzpU8jj0XLUTrbq7khtOqSwVUCk4nYCgIiy73cHLemInurE8Fm_4uwUw27fJ8nP4IM7BBe_5deBEEIAx5I_ckru5JfsSITbmMx-dw5-A8aTsjYnr_amPj1QfELhXKd0F59DQvFm_kiWsZzygmaLh5DGzJqPcqIJDUh6R35Brg6stlwJSXJHtMkXQ7khjStKiN822RjmSOAYUMfMZwe8r-Y3TxmLDeVcNpbjXEy7p2TGdYLuBc9072JHN0y3riuu7DiG4TLZ83SMtzwnyBzBuMRN0gX_JRxEfBkeeEfDpOJ4JAzHeiRTExAoEkpSQ
 
 #### JOSE Spec
 
@@ -171,49 +126,57 @@ If it eventually does, we will consider moving to it.
 
 ### Identity Assertion
 
-An Identity Assertion is a JWT with the following claims:
+An Identity Assertion is a JWT-like object, signed by an Identity Certificate, with the following claims:
 
-* `exp` for expiration
-* `aud` for the relying party (audience.)
+* `exp` for expiration (milliseconds-since-epoch)
+* `aud` for the relying party (audience), a URL that includes the scheme and any non-standard port number, like `https://123done.org` or `https://example.com:8080`
 
-An assertion might look like (with line breaks for readability):
+An assertion might look like (with whitespace added for readability):
 
-    eyJhbGciOiAiUlMyNTYiLCAidHlwIjogIkpXVCJ9.
-    eyJleHAiOjEzMjAyODA1Nzk0MzcsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MTAwMDEifQ.
-    JmEBqwOH_qzw6_EHsCRB-CeShGyQ2y0bpapARZ308_8uT6TCWrKBpB8L2bFnMb664lz1nGytkBXF-tTIzGCOjg
+    eyJhbGciOiJEUzEyOCJ9
+    .eyJleHAiOjEzNDc5OTQ2OTgxNDAsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MTAwMDEifQ
+    .F32SIQWeKNDFSRVdpOWkWrEdKdG-itlsFkPhY_P4eXdtG9YiG24kvw
 
-which is a JWT with header:
+which is a JWT-like object with header:
 
-    {"typ":"JWT", "alg":"RS256"}
+    {"alg":"DS128"}
 
 and a payload of:
 
-    {"exp":1320280579437, "aud":"http://localhost:10001"}
+    {'aud': 'http://localhost:10001', 'exp': 1347994698140}
 
 ### Backed Identity Assertion
 
-A Backed Identity Assertion is a combination of an Identity Assertion and a sequence of Identity Certificates that verifiably tie the assertion to an issuing domain.
-This combination is expressed as a single string like this:
-
-    <cert-1>~...<cert-n>~<identityAssertion>
-
-where each cert and the identity assertion are base64url-encoded data structures, as defined above, and the strings are joined by tilde characters (U+007E).
-
-The first element is certified by the issuing domain's private key, and each subsequent element is certified by the previous one.
-
-Most often, a backed identity assertion is a single certificate tying a public-key to an Identity (signed by the domain), and an Identity Assertion signed by the just-certified public key, e.g:
+A Backed Identity Assertion is a combination of an Identity Assertion and an Identity Certificate that verifiably tie the assertion to an issuing domain.
+The certificate ties a public-key to an Identity (signed by the domain which "owns" that Identity), and the assertion is signed by the public key.
+The combination is expressed as a single string like this:
 
     <cert-1>~<identityAssertion>
 
-in which cert-1 has an "iss" of the issuing domain (e.g. "example.com"), a "publicKey" of the user's certified key, a "principal" of `{"email": "user@example.com"}`, and is signed by the example.com private key.
+where the cert and the identity assertion are base64url-encoded data structures, as defined above, and the strings are joined by tilde characters (U+007E).
+In this example, cert-1 has an "iss" of the issuing domain (e.g. "example.com"), a "public-key" of the user's certified key, a "principal" of `{"email": "user@example.com"}`, and is signed by the example.com private key.
 The identityAssertion would have an "exp" and "aud" field, and is signed by the user's private key.
+
+A Backed Identity Assertion might look like this (with whitespace added for readability):
+
+    eyJhbGciOiJSUzI1NiJ9
+    .eyJwdWJsaWMta2V5Ijp7ImFsZ29yaXRobSI6IkRTIiwieSI6IjJiMGI2ZjQ0ZjU4ZWM0ZmQ1MDQzYmU2YzY4NDMzYmM4MzliYjg2NzI3NmY5MGE5YzdhNjgwNzEwOTcxNjdkMmNhYjJkZjUzYWE1YWU5Mjg4NDNkMTVhNDI0MTIxMjNlZTI0YzQwNjdkN2I4NTg3ODUwZDFmMDlmYTM5Y2M1YmI1MmY4Yjg4NDRjMzEzMjQ0MGYyZTQ1NWFlYTgyMzU1MzViMjhhOGYwMTU4ODIwOWYxNDVlZTFmMjY1MjU3ZmU5OTk5YmM5MDU0N2JhOTg1MDUyYWQ0ZmIzMjBmYjkxNTM4NzgxNjRiZjM1NzJkYzVjNGZlNDkzZTY2NTA2ZjJiMDQiLCJwIjoiZmY2MDA0ODNkYjZhYmZjNWI0NWVhYjc4NTk0YjM1MzNkNTUwZDlmMWJmMmE5OTJhN2E4ZGFhNmRjMzRmODA0NWFkNGU2ZTBjNDI5ZDMzNGVlZWFhZWZkN2UyM2Q0ODEwYmUwMGU0Y2MxNDkyY2JhMzI1YmE4MWZmMmQ1YTViMzA1YThkMTdlYjNiZjRhMDZhMzQ5ZDM5MmUwMGQzMjk3NDRhNTE3OTM4MDM0NGU4MmExOGM0NzkzMzQzOGY4OTFlMjJhZWVmODEyZDY5YzhmNzVlMzI2Y2I3MGVhMDAwYzNmNzc2ZGZkYmQ2MDQ2MzhjMmVmNzE3ZmMyNmQwMmUxNyIsInEiOiJlMjFlMDRmOTExZDFlZDc5OTEwMDhlY2FhYjNiZjc3NTk4NDMwOWMzIiwiZyI6ImM1MmE0YTBmZjNiN2U2MWZkZjE4NjdjZTg0MTM4MzY5YTYxNTRmNGFmYTkyOTY2ZTNjODI3ZTI1Y2ZhNmNmNTA4YjkwZTVkZTQxOWUxMzM3ZTA3YTJlOWUyYTNjZDVkZWE3MDRkMTc1ZjhlYmY2YWYzOTdkNjllMTEwYjk2YWZiMTdjN2EwMzI1OTMyOWU0ODI5YjBkMDNiYmM3ODk2YjE1YjRhZGU1M2UxMzA4NThjYzM0ZDk2MjY5YWE4OTA0MWY0MDkxMzZjNzI0MmEzODg5NWM5ZDViY2NhZDRmMzg5YWYxZDdhNGJkMTM5OGJkMDcyZGZmYTg5NjIzMzM5N2EifSwicHJpbmNpcGFsIjp7ImVtYWlsIjoid2FybmVyQG1vY2tteWlkLmNvbSJ9LCJpYXQiOjEzNDc5OTQ0MDE0MDEsImV4cCI6MTM0Nzk5ODAwMTQwMSwiaXNzIjoibW9ja215aWQuY29tIn0
+    .ddZEPpT3E1BdZfOLABoRZhvnKidzpU8jj0XLUTrbq7khtOqSwVUCk4nYCgIiy73cHLemInurE8Fm_4uwUw27fJ8nP4IM7BBe_5deBEEIAx5I_ckru5JfsSITbmMx-dw5-A8aTsjYnr_amPj1QfELhXKd0F59DQvFm_kiWsZzygmaLh5DGzJqPcqIJDUh6R35Brg6stlwJSXJHtMkXQ7khjStKiN822RjmSOAYUMfMZwe8r-Y3TxmLDeVcNpbjXEy7p2TGdYLuBc9072JHN0y3riuu7DiG4TLZ83SMtzwnyBzBuMRN0gX_JRxEfBkeeEfDpOJ4JAzHeiRTExAoEkpSQ
+    ~eyJhbGciOiJEUzEyOCJ9
+    .eyJleHAiOjEzNDc5OTQ2OTgxNDAsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MTAwMDEifQ
+    .F32SIQWeKNDFSRVdpOWkWrEdKdG-itlsFkPhY_P4eXdtG9YiG24kvw
+
+
+Multiple certificates in a single backed assertion will be used by certificate-chaining, which is not defined or implemented yet.
+The elements of these chains will also be joined by tilde characters, e.g. <cert-1>~<cert-2>~<cert-3>~<identityAssertion>.
+The first element will be certified by the issuing domain's private key, and each subsequent element will be certified by the previous one.
 
 ### BrowserID Support Document
 
-A BrowserID support document MUST be a well-formed JSON document with at least these three fields: `jwk`, `authentication`, and `provisioning`.
+A BrowserID support document MUST be a well-formed JSON document with at least these three fields: `public-key`, `authentication`, and `provisioning`.
 The document MAY contain additional JSON fields.
 
-The value of the `jwk` field MUST be a JWK object as described above, with `kid` specified for all keys.
+The value of the `public-key` field MUST be a Public Key object as described above.
 
 The value of the `authentication` field MUST be a relative reference to a URI, as defined by [RFC3986](https://tools.ietf.org/html/rfc3986).
 
@@ -222,14 +185,9 @@ The value of the `provisioning` field MUST also be a relative reference to a URI
 For example:
 
      {
-        "publicKeys": {
-           "generated-on-2012-06-20":
-               {
-                "algorithm": "RSA",
-                ...,
-                "kid": "generated-on-2012-06-20"
-               },
-           ...
+       "public-key": {
+           "algorithm": "RS",
+           ...,
         },
         "authentication": "/browserid/sign_in.html",
         "provisioning": "/browserid/provision.html"
