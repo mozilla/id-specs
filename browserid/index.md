@@ -113,7 +113,7 @@ A complete JWT set of claims then looks like:
       }
     }
 
-Which, when signed, becomes a base64url-encoded data structure which looks like the following (with linebreaks added for easier reading; the full string has exactly two periods and no whitespace):
+Which, when signed, becomes a base64url-encoded data structure (using `_-` instead of `+/`) which looks like the following (with linebreaks added for easier reading; the full string has exactly two periods and no whitespace):
 
     eyJhbGciOiJSUzI1NiJ9
     .eyJwdWJsaWMta2V5Ijp7ImFsZ29yaXRobSI6IkRTIiwieSI6IjJiMGI2ZjQ0ZjU4ZWM0ZmQ1MDQzYmU2YzY4NDMzYmM4MzliYjg2NzI3NmY5MGE5YzdhNjgwNzEwOTcxNjdkMmNhYjJkZjUzYWE1YWU5Mjg4NDNkMTVhNDI0MTIxMjNlZTI0YzQwNjdkN2I4NTg3ODUwZDFmMDlmYTM5Y2M1YmI1MmY4Yjg4NDRjMzEzMjQ0MGYyZTQ1NWFlYTgyMzU1MzViMjhhOGYwMTU4ODIwOWYxNDVlZTFmMjY1MjU3ZmU5OTk5YmM5MDU0N2JhOTg1MDUyYWQ0ZmIzMjBmYjkxNTM4NzgxNjRiZjM1NzJkYzVjNGZlNDkzZTY2NTA2ZjJiMDQiLCJwIjoiZmY2MDA0ODNkYjZhYmZjNWI0NWVhYjc4NTk0YjM1MzNkNTUwZDlmMWJmMmE5OTJhN2E4ZGFhNmRjMzRmODA0NWFkNGU2ZTBjNDI5ZDMzNGVlZWFhZWZkN2UyM2Q0ODEwYmUwMGU0Y2MxNDkyY2JhMzI1YmE4MWZmMmQ1YTViMzA1YThkMTdlYjNiZjRhMDZhMzQ5ZDM5MmUwMGQzMjk3NDRhNTE3OTM4MDM0NGU4MmExOGM0NzkzMzQzOGY4OTFlMjJhZWVmODEyZDY5YzhmNzVlMzI2Y2I3MGVhMDAwYzNmNzc2ZGZkYmQ2MDQ2MzhjMmVmNzE3ZmMyNmQwMmUxNyIsInEiOiJlMjFlMDRmOTExZDFlZDc5OTEwMDhlY2FhYjNiZjc3NTk4NDMwOWMzIiwiZyI6ImM1MmE0YTBmZjNiN2U2MWZkZjE4NjdjZTg0MTM4MzY5YTYxNTRmNGFmYTkyOTY2ZTNjODI3ZTI1Y2ZhNmNmNTA4YjkwZTVkZTQxOWUxMzM3ZTA3YTJlOWUyYTNjZDVkZWE3MDRkMTc1ZjhlYmY2YWYzOTdkNjllMTEwYjk2YWZiMTdjN2EwMzI1OTMyOWU0ODI5YjBkMDNiYmM3ODk2YjE1YjRhZGU1M2UxMzA4NThjYzM0ZDk2MjY5YWE4OTA0MWY0MDkxMzZjNzI0MmEzODg5NWM5ZDViY2NhZDRmMzg5YWYxZDdhNGJkMTM5OGJkMDcyZGZmYTg5NjIzMzM5N2EifSwicHJpbmNpcGFsIjp7ImVtYWlsIjoid2FybmVyQG1vY2tteWlkLmNvbSJ9LCJpYXQiOjEzNDc5OTQ0MDE0MDEsImV4cCI6MTM0Nzk5ODAwMTQwMSwiaXNzIjoibW9ja215aWQuY29tIn0
@@ -154,7 +154,7 @@ The combination is expressed as a single string like this:
     <cert-1>~<identityAssertion>
 
 where the cert and the identity assertion are base64url-encoded data structures, as defined above, and the strings are joined by tilde characters (U+007E).
-In this example, cert-1 has an "iss" of the issuing domain (e.g. "example.com"), a "public-key" of the user's certified key, a "principal" of `{"email": "user@example.com"}`, and is signed by the example.com private key.
+For example, cert-1 could have an "iss" of the issuing domain (e.g. "example.com"), a "public-key" of the user's certified key, a "principal" of `{"email": "user@example.com"}`, and would be signed by the example.com private key.
 The identityAssertion would have an "exp" and "aud" field, and is signed by the user's private key.
 
 A Backed Identity Assertion might look like this (with whitespace added for readability):
@@ -168,7 +168,10 @@ A Backed Identity Assertion might look like this (with whitespace added for read
 
 
 Multiple certificates in a single backed assertion will be used by certificate-chaining, which is not defined or implemented yet.
-The elements of these chains will also be joined by tilde characters, e.g. <cert-1>~<cert-2>~<cert-3>~<identityAssertion>.
+The elements of these chains will also be joined by tilde characters, e.g.:
+
+    <cert-1>~<cert-2>~<cert-3>~<identityAssertion>.
+
 The first element will be certified by the issuing domain's private key, and each subsequent element will be certified by the previous one.
 
 ### BrowserID Support Document
