@@ -447,6 +447,9 @@ The User Agent MUST follow these steps:
 * for the given Identity, e.g. `alice@example.com`, determine the domain portion of the identifier, e.g. `example.com`
 * look up the BrowserID configuration at `https://<DOMAIN>/.well-known/browserid`, e.g. in this case `https://example.com/.well-known/browserid`.
   If this lookup fails, use the Fallback IdP.
+* if the domain portion of the identifier does not match the domain name being used for lookup, append a query string parameter domain=<EMAIL_DOMAIN>
+  * This is used during delegation of authority as well as Fallback Mode.
+  * Example: `https://<DELEGATED_DOMAIN>/.well-known/browserid?domain=<EMAIL_DOMAIN>
 * parse the BrowserID configuration file as a JSON object.
 * if the configuration is a proper BrowserID Support document, then store the JSON object as `IDP(identity)` for the requested Identity, with `provisioning` and `authentication` resolved as URLs relative to `https://<domain>`
 * if the configuration is a proper BrowserID Delegated Support document, then proceed recursively with the configuration lookup process for the delegated domain, i.e. the value of the `authority` parameter.
@@ -653,6 +656,8 @@ The BrowserID support document (or delegated-support document) MUST be served wi
 
 The BrowserID support document (or delegated-support document) MAY be served with cache headers to indicate longevity of the BrowserID support parameters.
 
+The BrowserID support document (or delegated-support document) MAY be dynamic and change based on the `domain` query string parameter's value.
+
 ### Authenticating Users
 
 A BrowserID-compliant domain MUST provide a user-authentication web flow starting at the URI referenced by the `authentication` field in its published BrowserID support document.
@@ -723,6 +728,8 @@ A domain that includes the standard port, of 80 for HTTP and 443 for HTTPS, SHOU
 5. If the first certificate (or only certificate when there is only one) is not properly signed by the expected issuer's public key, reject the assertion.
 The expected issuer is either the domain of the certified email address in the last certificate, or the issuer listed in the first certificate if the email-address domain does not support BrowserID.
 6. If the expected issuer was designated by the certificate rather than discovered given the user's email address, then the issuer SHOULD be `browserid.org`, otherwise reject the assertion.
+
+See User-Agent Compliance for verification discovery details.
 
 Note that a relying party may, at its discretion, use a verification service that performs these steps and returns a summary of results.
 In that case, the verification service MUST perform all the checks described here.
