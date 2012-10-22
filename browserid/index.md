@@ -445,10 +445,10 @@ The User Agent MUST be able to determine an IdP, designated by a domain name, fo
 The User Agent MUST follow these steps:
 
 * for the given Identity, e.g. `alice@example.com`, determine the domain portion of the identifier, e.g. `example.com`
-* look up the BrowserID configuration at `https://<DOMAIN>/.well-known/browserid`, e.g. in this case `https://example.com/.well-known/browserid`.
+* look up the BrowserID configuration at `https://<DOMAIN>/.well-known/browserid?domain=<EMAIL_DOMAIN>`, e.g. in this case `https://example.com/.well-known/browserid?domain=example.com`.
   If this lookup fails, use the Fallback IdP.
-* if the domain portion of the identifier does not match the domain name being used for lookup, append a query string parameter domain=<EMAIL_DOMAIN>
-  * This is used during delegation of authority as well as Fallback Mode.
+* UA MAY skip appending the query string parameter domain=<EMAIL_DOMAIN> if the DOMAIN and EMAIL_DOMAIN portions are identical, effectively the first primary lookup.
+  * The domain query string parameter MUST be provided during delegation of authority as well as Fallback Mode.
   * Example: `https://<DELEGATED_DOMAIN>/.well-known/browserid?domain=<EMAIL_DOMAIN>
 * parse the BrowserID configuration file as a JSON object.
 * if the configuration is a proper BrowserID Support document, then store the JSON object as `IDP(identity)` for the requested Identity, with `provisioning` and `authentication` resolved as URLs relative to `https://<domain>`
