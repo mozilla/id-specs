@@ -235,10 +235,10 @@ By supplying this parameter, you can speed up your page load by suppressing unne
 
   * If you do not supply anything (`loggedInUser` is `undefined`), the user's browser WILL invoke either your `onlogin` or your `onlogout` callback to indicate if the user would like to be logged in or not.
   * If you supply `null` or `false`:
-    * If the user's browser also believes that the user does not want to be logged in, then your `onlogout` callback WILL NOT be invoked.
+    * If the user's browser also believes that the user does not want to be logged in, then your `onmatch` callback, if provided, WILL be invoked.
     * If the user's browser disagrees and believes that the user does want to be logged in, then your `onlogin` callback WILL be invoked.
   * If you supply an email address as a String:
-    * If the user's browser agrees that the user would like to be logged in as the user specified in `loggedInUser`, then your `onlogin` callback WILL NOT be invoked.
+    * If the user's browser agrees that the user would like to be logged in as the user specified in `loggedInUser`, then your `onmatch` callback, if provided, WILL be invoked.
     * If the user's browser agrees that the user would like to be logged in, but as someone other than the user specified in `loggedInUser`, then your `onlogin` callback WILL be invoked with a Backed Identity Assertion for the correct user.
     * If the user's browser disagrees and believes that the user does not want to be logged in at all, then your `onlogout` callback WILL be invoked.
   * If you supply a parameter of any other type, the user's browser will throw an exception.
@@ -248,7 +248,8 @@ This means that there are three possible sequences of callabacks:
 
   1. `onlogin` then `onready`.
   2. `onlogout` then `onready`.
-  3. `onready` only.
+  3. `onmatch` then `onready`.
+
 
 ### Example Code
 
@@ -265,9 +266,9 @@ This means that there are three possible sequences of callabacks:
         // a user has logged out!  make a call to your server or redirect the user
         // to tear down the session
       },
-      onready: function() {
-        // this is called *after* onlogin or onlogout, so you can display the login state
-        // and user-specific information.
+      onmatch: function() {
+        // this is called if loggedInUser matched the browser's current user state.
+        // You can now display the login state and user-specific information.
       }
     });
 
@@ -293,14 +294,15 @@ The option block has the following properties:
   * `loggedInUser` *(optional)* - The email address of the currently logged in user.
     May be `undefined`, `null` or `false` (indicating that no user is logged in), or an email address (as a String).
     If omitted or `undefined`, either `onlogin` or `onlogout` will be invoked on every page load.
-    If `null`, `false`, or an email address as a String, then the `onlogin` or `onlogout` callback will not be invoked if the user's login state is consistent with the specified value.
+    If `null`, `false`, or an email address as a String, then the optional `onmatch` callback will be invoked if the user's login state is consistent with the specified value.
     Any other value will result in an exception being thrown.
-  * `loggedInEmail` *(optional)* - Old, deprecated name for `loggedInUser`.
+  * **DEPRECATED** `loggedInEmail` *(optional)* - Previous name for `loggedInUser`.
      If provided, it should behave identically to `loggedInUser`.
      If both `loggedInUser` and `loggedInEmail` are provided, the user agent should immediately throw an exception.
   * `onlogin` *(required)* - A callback that will be invoked and passed a single argument, an assertion, when the user logs in.
   * `onlogout` *(required)* - A callback that will be invoked when the user logs out.
-  * `onready` *(optional)* - A callback that will always be called once the navigator.id service is initialized (after `onlogin` or `onlogout` have been called).
+  * `onmatch` *(optional)* - A callback that will be invoked if the user's login state matches the value of `loggedInUser`.
+  * **DEPRECATED** `onready` *(optional)* - A callback that will always be called once the navigator.id service is initialized (after `onlogin`, `onlogout`, or `onmatch` have been called).
     By waiting to display UI until this point, you can avoid UI flicker in the case where your session is out of sync with BrowserID.
 
 #### navigator.id.request(&lt;options&gt;);
@@ -582,9 +584,9 @@ If both `params.loggedInUser` and `params.loggedInEmail` exist, the User Agent M
   * Otherwise, the User Agent SHOULD invoke `onlogout`.
 * If the value of `params.loggedInUser` is `null` or `false`:
   * If `HISTORY(origin).loggedIn` is `true`, then the User Agent SHOULD invoke `onlogin` with a Backed Identity Assertion for `HISTORY(origin).id`.
-  * Otherwise, the User Agent SHOULD NOT invoke `onlogout` or `onlogin`.
+  * Otherwise, the User Agent SHOULD invoke `onmatch` if it was provided.
 * If the value of `params.loggedInUser` is a String:
-  * If `HISTORY(origin).loggedIn` is `true`, and `params.loggedInUser` matches `HISTORY(origin).id`, then the User Agent SHOULD NOT invoke `onlogin` or `onlogout`.
+  * If `HISTORY(origin).loggedIn` is `true`, and `params.loggedInUser` DOES match `HISTORY(origin).id`, then the User Agent SHOULD invoke `onmatch` if it was provided.
   * If `HISTORY(origin).loggedIn` is `true`, and `params.loggedInUser` DOES NOT match `HISTORY(origin).id`, then the User Agent SHOULD invoke `onlogin` with a Backed Identity Assertion for `HISTORY(origin).id`.
   * Otherwise, the User Agent SHOULD invoke `onlogout`.
 * If the value of `params.loggedInUser` is any other type:
