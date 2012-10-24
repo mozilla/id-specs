@@ -241,6 +241,7 @@ By supplying this parameter, you can speed up your page load by suppressing unne
     * If the user's browser agrees that the user would like to be logged in as the user specified in `loggedInUser`, then your `onlogin` callback WILL NOT be invoked.
     * If the user's browser agrees that the user would like to be logged in, but as someone other than the user specified in `loggedInUser`, then your `onlogin` callback WILL be invoked with a Backed Identity Assertion for the correct user.
     * If the user's browser disagrees and believes that the user does not want to be logged in at all, then your `onlogout` callback WILL be invoked.
+  * If you supply a parameter of any other type, the user's browser will throw an exception.
 
 **Telling you when it's ready**: If provided, BrowserID will always invoke your `onready` callback after it finishes comparing login states and invoking callbacks as defined above.
 This means that there are three possible sequences of callabacks:
@@ -292,7 +293,8 @@ The option block has the following properties:
   * `loggedInUser` *(optional)* - The email address of the currently logged in user.
     May be `undefined`, `null` or `false` (indicating that no user is logged in), or an email address (as a String).
     If omitted or `undefined`, either `onlogin` or `onlogout` will be invoked on every page load.
-    If `null`, `false`, or an email address, then the `onlogin` or `onlogout` callback will not be invoked if the user's login state is consistent with the specified value.
+    If `null`, `false`, or an email address as a String, then the `onlogin` or `onlogout` callback will not be invoked if the user's login state is consistent with the specified value.
+    Any other value will result in an exception being thrown.
   * `loggedInEmail` *(optional)* - Old, deprecated name for `loggedInUser`.
      If provided, it should behave identically to `loggedInUser`.
      If both `loggedInUser` and `loggedInEmail` are provided, the user agent should immediately throw an exception.
@@ -572,7 +574,25 @@ The User Agent SHOULD throw an exception immediately UNLESS `params` includes th
 If `params` includes the above required parameters, the User Agent SHOULD store the entire `params` object scoped to the `document`, including the above callbacks and any additional fields.
 If the `document` DOM object disappears for any reason (unloading, closing, etc.), these callbacks should be garbage-collected.
 
-TODO: Explain what to do for various values of `params.loggedInUser` / `params.loggedInEmail`. What if both exist?
+If `params.loggedInEmail` exists, it should be treated equivalently to `params.loggedInUser` below, UNLESS `params.loggedInUser` also exists.
+If both `params.loggedInUser` and `params.loggedInEmail` exist, the User Agent MUST throw an exception immediately.
+
+* If the value of `params.loggedInUser` is omitted or `undefined`:
+  * If `HISTORY(origin).loggedIn` is `true`, then the User Agent SHOULD invoke `onlogin` with a Backed Identity Assertion for `HISTORY(origin).id`.
+  * Otherwise, the User Agent SHOULD invoke `onlogout`.
+* If the value of `params.loggedInUser` is `null` or `false`:
+  * If `HISTORY(origin).loggedIn` is `true`, then the User Agent SHOULD invoke `onlogin` with a Backed Identity Assertion for `HISTORY(origin).id`.
+  * Otherwise, the User Agent SHOULD NOT invoke `onlogout` or `onlogin`.
+* If the value of `params.loggedInUser` is a String:
+  * If `HISTORY(origin).loggedIn` is `true`, and `params.loggedInUser` matches `HISTORY(origin).id`, then the User Agent SHOULD NOT invoke `onlogin` or `onlogout`.
+  * If `HISTORY(origin).loggedIn` is `true`, and `params.loggedInUser` DOES NOT match `HISTORY(origin).id`, then the User Agent SHOULD invoke `onlogin` with a Backed Identity Assertion for `HISTORY(origin).id`.
+  * Otherwise, the User Agent SHOULD invoke `onlogout`.
+* If the value of `params.loggedInUser` is any other type:
+  * The User Agent MUST throw an exception immediately.
+
+After completing the above, the User Agent SHOULD invoke `params.onready` if it was provided.
+
+TODO: What if the user agent is unable to invoke `onlogin` because the user's Identity Certificate for that id has expired? Should it invoke `logout` or prompt the user to refresh the certificate?
 
 #### navigator.id.request(object options);
 
