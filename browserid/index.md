@@ -226,17 +226,28 @@ Typically on the web, login sessions are implemented with cookies and are comple
 With BrowserID you can continue to implement sessions as you do today, but must take a couple extra steps to synchronize your session with BrowserID.
 Specifically, you should handle the case where the user logs in or out via BrowserID, while your page is not loaded.
 
-**Watching Login State**: The `navigator.id.watch()` function allows you to register javascript functions that will be invoked when users log in or out, which may occur while they're visiting your website, or while it's not even loaded.
+**Watching login state**: The `navigator.id.watch()` function allows you to register javascript functions that will be invoked when users log in or out, which may occur while they're visiting your website, or while it's not even loaded.
 Each page of your site should call `navigator.id.watch()` and be prepared to handle asynchronous changes to login state.
 
-**Telling BrowserID who is logged in**: An important parameter to `navigator.id.watch()` is `loggedInEmail`.
-When supplied, this parameter tells BrowserID whether the current page load is associated with a logged in user.
+**Telling BrowserID who is logged in**: An important parameter to `navigator.id.watch()` is `loggedInUser`.
+When supplied, this parameter tells BrowserID whether the current response is associated with a logged in user.
 By supplying this parameter, you can speed up your page load by suppressing unnecessary callbacks (and using less CPU and network resources):
 
-  * If you supply `null`, and no user is logged in according to BrowserID, your `onlogout` callback will not be invoked.
-  * If you supply an email address and that user is still logged in via BrowserID, your `onlogin` callback will not be invoked.
-  * If you supply an email address and a different user is logged in via BrowserID, your `onlogin` callback will be invoked with a new assertion.
-    `onlogout` will not be invoked [XXX is this right?]
+  * If you do not supply anything (`loggedInUser` is `undefined`), the user's browser WILL invoke either your `onlogin` or your `onlogout` callback to indicate if the user would like to be logged in or not.
+  * If you supply `null` or `false`:
+    * If the user's browser also believes that the user does not want to be logged in, then your `onlogout` callback WILL NOT be invoked.
+    * If the user's browser disagrees and believes that the user does want to be logged in, then your `onlogin` callback WILL be invoked.
+  * If you supply an email address as a String:
+    * If the user's browser agrees that the user would like to be logged in as the user specified in `loggedInUser`, then your `onlogin` callback WILL NOT be invoked.
+    * If the user's browser agrees that the user would like to be logged in, but as someone other than the user specified in `loggedInUser`, then your `onlogin` callback WILL be invoked with a Backed Identity Assertion for the correct user.
+    * If the user's browser disagrees and believes that the user does not want to be logged in at all, then your `onlogout` callback WILL be invoked.
+
+**Telling you when it's ready**: If provided, BrowserID will always invoke your `onready` callback after it finishes comparing login states and invoking callbacks as defined above.
+This means that there are three possible sequences of callabacks:
+
+  1. `onlogin` then `onready`.
+  2. `onlogout` then `onready`.
+  3. `onready` only.
 
 ### Example Code
 
@@ -244,7 +255,7 @@ By supplying this parameter, you can speed up your page load by suppressing unne
     var emailAddressOfCurrentlyLoggedInUser = ...;
 
     navigator.id.watch({
-      loggedInEmail: emailAddressOfCurrentlyLoggedInUser,
+      loggedInUser: emailAddressOfCurrentlyLoggedInUser,
       onlogin: function(assertion) {
         // a user has logged in!  now verify the assertion on your server, create a session,
         // and update your UI
@@ -278,10 +289,13 @@ By supplying this parameter, you can speed up your page load by suppressing unne
 Register callbacks to be notified when the user logs in or out.
 The option block has the following properties:
 
-  * `loggedInEmail` *(optional)* - The email address of the currently logged in user.
-    May be a string (email address), or `null` (indicating no user is logged in).
-    If provided, the `onlogin` or `onlogout` callbacks will not be invoked if the users' login state is consistent with the value provided.
-    If omitted or `undefined`, one of the two callbacks will be invoked on every page load.
+  * `loggedInUser` *(optional)* - The email address of the currently logged in user.
+    May be `undefined`, `null` or `false` (indicating that no user is logged in), or an email address (as a String).
+    If omitted or `undefined`, either `onlogin` or `onlogout` will be invoked on every page load.
+    If `null`, `false`, or an email address, then the `onlogin` or `onlogout` callback will not be invoked if the user's login state is consistent with the specified value.
+  * `loggedInEmail` *(optional)* - Old, deprecated name for `loggedInUser`.
+     If provided, it should behave identically to `loggedInUser`.
+     If both `loggedInUser` and `loggedInEmail` are provided, the user agent should immediately throw an exception.
   * `onlogin` *(required)* - A callback that will be invoked and passed a single argument, an assertion, when the user logs in.
   * `onlogout` *(required)* - A callback that will be invoked when the user logs out.
   * `onready` *(optional)* - A callback that will always be called once the navigator.id service is initialized (after `onlogin` or `onlogout` have been called).
@@ -542,7 +556,7 @@ The data _MUST NOT_ be available to web content.
 
 ### Generating Identity-Backed Assertions
 
-When
+TODO: Needs content.
 
 ### RP Authentication
 
@@ -558,12 +572,7 @@ The User Agent SHOULD throw an exception immediately UNLESS `params` includes th
 If `params` includes the above required parameters, the User Agent SHOULD store the entire `params` object scoped to the `document`, including the above callbacks and any additional fields.
 If the `document` DOM object disappears for any reason (unloading, closing, etc.), these callbacks should be garbage-collected.
 
-If `params.loggedInEmail` is `undefined`, the User Agent SHOULD:
-
-* if `HISTORY(origin).loggedIn`, invoke `onlogin` callback for the identity `HISTORY(origin).id` (see othe fire either the `onlogin` or `onlogout`
-The User Agent SHOULD determine whether `params.loggedInEmail` matches the User Agent's login state for the `document.location.origin`.
-
-If
+TODO: Explain what to do for various values of `params.loggedInUser` / `params.loggedInEmail`. What if both exist?
 
 #### navigator.id.request(object options);
 
