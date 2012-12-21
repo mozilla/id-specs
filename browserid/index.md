@@ -1,7 +1,7 @@
 BrowserID
 =====
 
-This is the production BrowserID specification, working live at <tt>https://browserid.org</tt>.
+This is the production BrowserID specification, working live at <tt>https://login.persona.org</tt>.
 
 Overview
 -
@@ -411,7 +411,7 @@ To verify a Backed Identity Assertion, a Relying Party SHOULD perform the follow
 1. If the Identity Assertion's signature does not verify against the public-key within the last Identity Certificate, reject the assertion.
 1. If there is more than one Identity Certificate, then reject the assertion unless each certificate after the first one is properly signed by the prior certificate's public key.
 1. If the first certificate (or only certificate when there is only one) is not properly signed by the expected issuer's public key, reject the assertion. The expected issuer is either the domain of the certified email address in the last certificate, or the issuer listed in the first certificate if the email-address domain does not support BrowserID.
-1. If the expected issuer was designated by the certificate rather than discovered given the user's email address, then the issuer SHOULD be <tt>browserid.org</tt>, otherwise reject the assertion.
+1. If the expected issuer was designated by the certificate rather than discovered given the user's email address, then the issuer SHOULD be <tt>login.persona.org</tt>, otherwise reject the assertion.
 
 A relying party MAY use a verification service that performs these steps and returns a summary of results.  In that case, the verification service MUST perform all the checks described here.  In order to perform audience checking, the verification service SHOULD require that the relying party indicate the expected value of the <tt>audience</tt> parameter.
 
