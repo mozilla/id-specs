@@ -158,7 +158,7 @@ This assertion is a Backed Identity Assertion, as defined above. We call it <tt>
 Identity Provisioning Flow
 --
 
-Consider Alice, a user of <tt>EyeDee.me</tt>, with email address <tt>alice@eyedee.me</tt>. Alice wishes to user her <tt>alice@eyedee.me</tt> identity to log into web sites that support the BrowserID protocol:
+Consider Alice, a user of <tt>EyeDee.me</tt>, with email address <tt>alice@eyedee.me</tt>. Alice wishes to use her <tt>alice@eyedee.me</tt> identity to log into web sites that support the BrowserID protocol:
 
 * Alice visits <tt>example.com</tt> and clicks "login."
 * In the BrowserID interface, Alice types her email address <tt>alice@eyedee.me</tt>.
