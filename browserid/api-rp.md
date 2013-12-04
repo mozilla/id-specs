@@ -13,6 +13,7 @@
                 <li>User input should be treated carefully &mdash; siteLogo may be an SVG, which opens an avenue for scripting.</li>
             </ul>
         </blockquote>
+
         <strong>Required Parameters:</strong>
         <dl>
             <dt>
@@ -25,6 +26,19 @@
                 Receives a Backed Identity Assertion as its first argument.
             </dd>
         </dl>
+
+        <strong>Optional Parameters:</strong>
+        <dl>
+            <dt>
+                <strong><code>onready</code></strong>:
+                <code><strong>function ()</strong> { … }</code>
+            </dt>
+            <dd>
+                Callback.
+                Invoked when the user agent is ready to handle BrowserID API calls.
+            </dd>
+        </dl>
+
         <strong>Visual Customization (Optional):</strong>
         <dl>
             <dt><strong><code>siteName</code></strong>: <strong>String</strong> (Freeform text)</dt>
@@ -53,17 +67,14 @@
         </blockquote>
         <strong>Behavior Customization (Optional):</strong>
         <dl>
-            <dt><strong><code>emailHint</code></strong>: <strong>String</strong> (Email address)</dt>
-            <dd>Skip address selection and attempt to authenticate the user as the hinted email address.</dd>
+            <dt><strong><code>email</code></strong>: <strong>String</strong> (Email address)</dt>
+            <dd>Skip address selection and attempt to authenticate the user as the given email address.</dd>
 
             <dt><strong><code>oncancel</code></strong>: <code><strong>function ()</strong> { … }</code></dt>
             <dd>
                 Callback.
                 Invoked if the user closes the login prompt without selecting an address.
             </dd>
-
-            <dt><strong><code>returnTo</code></strong>: <strong>String</strong> (Absolute path)</dt>
-            <dd>__TODO:__ How does this actually work in a native user agent?</dd>
         </dl>
     </dd>
 </dl>
