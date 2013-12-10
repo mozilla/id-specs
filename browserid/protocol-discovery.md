@@ -16,7 +16,7 @@ To discover the authoritative Identity Provider for a given email address:
     
     d. If the document is __complete and valid__, the discovered domain should be considered authoritative.
 
-All requests for a `/.well-known/browserid` file must include a query parameter, `domain`, whose value is the domain initially derived in Step 1. This parameter may be omitted if and only if the value is identical to the domain being queried in Step 2.
+All requests must include a query parameter, `domain`, whose value is the domain initially derived in Step 1. This parameter may be omitted if and only if the value is identical to the domain being queried in Step 2.
 
 > __Examples:__
 >
