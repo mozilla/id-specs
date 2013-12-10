@@ -16,28 +16,30 @@ To discover the authoritative Identity Provider for a given email address:
 
 All requests for a `/.well-known/browserid` file must include a query parameter, `domain`, whose value is the domain initially derived in Step 1. This parameter may be omitted if and only if the value is identical to the domain being queried in Step 2.
 
-> Example: Direct support by the user's domain.
+> __Examples:__
+>
+> - Direct support by the user's domain.
 > 
-> 1. The user is `alice@example.com`, thus the Original Domain is `example.com`
-> 2. GET `https://example.com/.well-known/browserid?domain=example.com`
-> 3. The response is valid: `example.com` is authoritative for `alice@example.com`
+>     1. The user is `alice@example.com`, thus the Original Domain is `example.com`>     
+>     2. GET `https://example.com/.well-known/browserid?domain=example.com`>     
+>     3. The response is valid: `example.com` is authoritative for `alice@example.com`
 >
-> Example: Two levels of delegation by the user's domain.
+> - Two levels of delegation by the user's domain.
 >
-> 1. The user is `alice@example.com`, thus the Original Domain is `example.com`
-> 2. GET `https://example.com/.well-known/browserid?domain=example.com`
-> 3. The response delegates to `example.org`
-> 4. GET `https://example.org/.well-known/browserid?domain=example.com` 
-> 5. The response delegates to `accounts.example.org`
-> 6. GET `https://accounts.example.org/.well-known/browserid?domain=example.com` 
-> 7. The response is valid: `accounts.example.org` is authoritative for `alice@example.com`
+>     1. The user is `alice@example.com`, thus the Original Domain is `example.com`
+>     2. GET `https://example.com/.well-known/browserid?domain=example.com`
+>     3. The response delegates to `example.org`
+>     4. GET `https://example.org/.well-known/browserid?domain=example.com` 
+>     5. The response delegates to `accounts.example.org`
+>     6. GET `https://accounts.example.org/.well-known/browserid?domain=example.com` 
+>     7. The response is valid: `accounts.example.org` is authoritative for `alice@example.com`
 >
-> Example: No direct support by the user's domain.
+> - No direct support by the user's domain.
 >
-> 1. The user is `alice@example.com`, thus the Original Domain is `example.com`
-> 2. GET `https://example.com/.well-known/browserid?domain=example.com`
-> 3. The response is not a valid Support Document. Attempt discovery at against the `fallback.test` Fallback Identity Provider.
-> 4. GET `https://fallback.test/.well-known/browserid?domain=example.com` 
-> 5. The response is valid: `fallback.test` is authoritative for `alice@example.com`
+>     1. The user is `alice@example.com`, thus the Original Domain is `example.com`
+>     2. GET `https://example.com/.well-known/browserid?domain=example.com`
+>     3. The response is not a valid Support Document. Attempt discovery at against the `fallback.test` Fallback Identity Provider.
+>     4. GET `https://fallback.test/.well-known/browserid?domain=example.com` 
+>     5. The response is valid: `fallback.test` is authoritative for `alice@example.com`
 >
 > The `?domain=example.com` parameter could be omitted only in the second step of each example above. All subsequent steps would still require the `?domain=example.com` parameter.
