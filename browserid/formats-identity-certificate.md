@@ -6,9 +6,9 @@ An Identity Certificate associates a user-generated public key with an email add
 
 The Header of an Identity Certificate contains the following fields:
 
-- __`alg`__: Required. String. Algorithm used for signing. Suggested values: `"RS256"`, `"RS384"`,  or `"RS512"`.
-- __`kid`__: Optional, Recommended. String. Key ID of the signing key used by the Identity Provider.
-- __`typ`__: Optional. String. MIME Type of the payload. Value: `"JWT"`.
+- `alg`: Required. String. Algorithm used for signing. Suggested values: `"RS256"`, `"RS384"`,  or `"RS512"`.
+- `kid`: Optional, Recommended. String. Key ID of the signing key used by the Identity Provider.
+- `typ`: Optional. String. MIME Type of the payload. Value: `"JWT"`.
 
 The fields `alg` and `kid` are defined by JWS. The field `typ` is defined by JWT.
 
@@ -18,10 +18,10 @@ __TODO__: JWA `alg` parameters for DSA? Which RS values to support?
 
 The Payload of an Identity Certificate is a JWT Claims Set with the following Claims, all of which are required:
 
-- __`iss`__: String. The hostname of the Identity Provider signing this certificate. For informational purposes only.
-- __`sub`__: String. The email address being certified. This must be a string conforming to the HTML5 definition of an email address.
-- __`iat`__: Integer. The time at which the certificate was issued, in seconds since the UTC epoch.
-- __`exp`__: Integer. The time at which the certificate expires, in seconds since the UTC epoch. Certificates must expire within 24 hours of `iat`.
-- __`pubkey`__: Object. The user's public key, serialized as defined elsewhere in this specification.
+- `iss`: String. The hostname of the Identity Provider signing this certificate. For informational purposes only.
+- `sub`: String. The email address being certified. This must be a string conforming to the HTML5 definition of an email address.
+- `iat`: Integer. The time at which the certificate was issued, in seconds since the UTC epoch.
+- `exp`: Integer. The time at which the certificate expires, in seconds since the UTC epoch. Certificates must expire within 24 hours of `iat`.
+- `pubkey`: Object. The user's public key, serialized as defined elsewhere in this specification.
 
 The fields `iss`, `sub`, `iat`, and `exp` are defined by JWT. The field `pubkey` is a Private Claim Name, as per JWT.

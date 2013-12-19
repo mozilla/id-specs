@@ -6,9 +6,9 @@ An Identity Assertion associates a user-generated public key with a request to a
 
 The Header of an Identity Assertion contains the following fields:
 
-- __`alg`__: Required. String. Algorithm used for signing. Suggested values: `"RS256"`, `"RS384"`,  or `"RS512"`.
-- __`kid`__: Optional. String. Key ID of the signing key used by the user.
-- __`typ`__: Optional. String. MIME Type of the payload. Value: `"JWT"`.
+- `alg`: Required. String. Algorithm used for signing. Suggested values: `"RS256"`, `"RS384"`,  or `"RS512"`.
+- `kid`: Optional. String. Key ID of the signing key used by the user.
+- `typ`: Optional. String. MIME Type of the payload. Value: `"JWT"`.
 
 The fields `alg` and `kid` are defined by JWS. The field `typ` is defined by JWT.
 
@@ -18,8 +18,8 @@ __TODO__: JWA `alg` parameters for DSA? Which RS values to support?
 
 The Payload of an Identity Assertion is a JWT Claims Set with the following Claims, all of which are required:
 
-- __`aud`__: String. The Relying Party for whom the Identity Assertion is intended. Formatted as a URL including a scheme, hostname, and port, but omitting paths, query parameters, and fragments. The port may be omitted if it is the default for the scheme (80 for HTTP, 443 for HTTPS).
-- __`exp`__: Integer. The time at which the assertion expires, in seconds since the UTC epoch. Assertions should expire within a few minutes of being created.
+- `aud`: String. The Relying Party for whom the Identity Assertion is intended. Formatted as a URL including a scheme, hostname, and port, but omitting paths, query parameters, and fragments. The port may be omitted if it is the default for the scheme (80 for HTTP, 443 for HTTPS).
+- `exp`: Integer. The time at which the assertion expires, in seconds since the UTC epoch. Assertions should expire within a few minutes of being created.
 
 The fields `aud`, and `exp` are defined by JWT.
 

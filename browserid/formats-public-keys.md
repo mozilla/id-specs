@@ -2,7 +2,7 @@
 
 BrowserID Public Keys follow [the JWK specification](http://tools.ietf.org/html/draft-ietf-jose-json-web-key-18#section-3) and come in two flavors, as defined by their required `kty` parameter:
 
-1. `"RSA"`: [As defined by JWA](http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-18.html#section-6.3).
+1. `"RSA"`: [As defined by JWA](http://tools.ietf.org/html/draft-ietf-jose-json-web-algo"rithms-18.html#section-6.3).
 2. `"DSA"`: Custom extension to JWA, defined below.
 
 Only the `kty`, `kid`, and RSA/DSA-specific parameters are used.
