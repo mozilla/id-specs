@@ -13,32 +13,30 @@ Identity Providers are strongly urged to define `kid` values for their keys.
 
 ### Parameters for DSA Keys
 
-__TODO__: Fully define p, q, g, and y.
-
 JWKs can represent DSA keys. In this case, the `kty` member value MUST be `DSA`.
 
 #### Parameters for DSA Public Keys
 
 The following members MUST be present for DSA public keys.
 
-##### "p" () Parameter
+##### "p" (Prime Modulus) Parameter
 
-TODO. It is represented as the base64url encoding of the value's unsigned big endian representation as an octet sequence. The octet sequence MUST utilize the minimum number of octets to represent the value.
+The `p` (prime modulus) member contains the larger prime modulus value for the DSA public key. It is represented as the base64url encoding of the value's unsigned big endian representation as an octet sequence. The octet sequence MUST utilize the minimum number of octets to represent the value.
 
-##### "q" () Parameter
+##### "q" (Prime Modulus) Parameter
 
-TODO. It is represented as the base64url encoding of the value's unsigned big endian representation as an octet sequence. The octet sequence MUST utilize the minimum number of octets to represent the value.
+The `q` (prime modulus) member contains the smaller prime modulus value for the DSA public key. It is represented as the base64url encoding of the value's unsigned big endian representation as an octet sequence. The octet sequence MUST utilize the minimum number of octets to represent the value.
 
-##### "g" () Parameter
+##### "g" (Generator) Parameter
 
-TODO. It is represented as the base64url encoding of the value's unsigned big endian representation as an octet sequence. The octet sequence MUST utilize the minimum number of octets to represent the value.
+The `g` (generator) member contains the generator value for the DSA public key. It is represented as the base64url encoding of the value's unsigned big endian representation as an octet sequence. The octet sequence MUST utilize the minimum number of octets to represent the value.
 
-##### "y" () Parameter
+##### "y" (Public Group Element) Parameter
 
-TODO. It is represented as the base64url encoding of the value's unsigned big endian representation as an octet sequence. The octet sequence MUST utilize the minimum number of octets to represent the value.
+The `y` (public group element) contains the public group element of the DSA public key, a positive integer between 1 and `p`, exclusive. It is represented as the base64url encoding of the value's unsigned big endian representation as an octet sequence. The octet sequence MUST utilize the minimum number of octets to represent the value.
 
 #### Parameters for DSA Private Keys
 
 ##### "x" (Private Exponent) Parameter
 
-The `x` (private exponent) member contains the private exponent value for the DSA private key. It is represented as the base64url encoding of the value's unsigned big endian representation as an octet sequence. The octet sequence MUST utilize the minimum number of octets to represent the value.
+The `x` (private exponent) member contains the private exponent value for the DSA private key, a positive integer between 0 and `q`, exclusive. It is represented as the base64url encoding of the value's unsigned big endian representation as an octet sequence. The octet sequence MUST utilize the minimum number of octets to represent the value.
