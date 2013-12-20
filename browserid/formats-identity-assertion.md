@@ -1,13 +1,13 @@
 ## Identity Assertion Format
 
-An Identity Assertion associates a user-generated public key with a request to a specific Relying Party. It is a JWT signed by the user's private key, it conforms to JWS, and it is serialized using JWS Compact Serialization.
+An Identity Assertion associates a client-generated public key with a request to a specific Relying Party. It is a JWT signed by the client's private key, it conforms to JWS, and it is serialized using JWS Compact Serialization.
 
 ### Header
 
 The Header of an Identity Assertion contains the following fields:
 
 - `alg`: Required. String. Algorithm used for signing. Suggested values: `"RS256"`, `"RS384"`,  or `"RS512"`.
-- `kid`: Optional. String. Key ID of the signing key used by the user.
+- `kid`: Optional. String. Key ID of the signing key used by the client.
 - `typ`: Optional. String. MIME Type of the payload. Value: `"JWT"`.
 
 The fields `alg` and `kid` are defined by JWS. The field `typ` is defined by JWT.
@@ -21,7 +21,9 @@ The Payload of an Identity Assertion is a JWT Claims Set with the following Clai
 - `aud`: String. The Relying Party for whom the Identity Assertion is intended. Formatted as a URL including a scheme, hostname, and port, but omitting paths, query parameters, and fragments. The port may be omitted if it is the default for the scheme (80 for HTTP, 443 for HTTPS).
 - `exp`: Integer. The time at which the assertion expires, in seconds since the UTC epoch. Assertions should expire within a few minutes of being created.
 
-The fields `aud`, and `exp` are defined by JWT.
+The fields `aud` and `exp` are defined by JWT.
+
+Additional claims may be added by clients for application-specific use. All claims that are not understood by consumers SHOULD be ignored.
 
 ### Backed Identity Assertions
 
