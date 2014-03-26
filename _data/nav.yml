@@ -1,0 +1,11 @@
+- Protocol:
+  - Discovery: /docs/protocol/discovery
+
+- APIs:
+  - Websites (RPs): /docs/apis/rp
+  - Providers (IdPs): /docs/apis/idp
+
+- Data Formats:
+  - Assertions and Certificates: /docs/formats/assertions
+  - Public Keys: /docs/formats/keys
+  - ./well-known/browserid: /docs/formats/well-known

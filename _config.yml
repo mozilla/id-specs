@@ -1,0 +1,16 @@
+exclude: [Gemfile, Gemfile.lock]
+permalink: pretty
+
+markdown: kramdown
+
+# For GitHub Pages compatibility
+# http://jekyllrb.com/docs/github-pages/#project_page_url_structure
+# When running locally, site is at http://localhost:4000/id-specs/
+baseurl: /id-specs
+
+# Settings enforced by GitHub Pages
+# https://help.github.com/articles/using-jekyll-with-pages/#configuring-jekyll
+safe: true
+lsi: false
+pygments: true
+source: .
