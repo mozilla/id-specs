@@ -2,8 +2,13 @@
 layout: default
 ---
 
-
 ## Relying Party (RP) API
+
+<p>
+  <span class="label label-warning">Warning</span>
+  This API ("Goldilocks") is not fully implemented.
+  Follow <a href="https://github.com/mozilla/persona/issues/4134">Bug 4134</a> for more information on its progress.
+</p>
 
 <dl>
     <dt><h3>navigator.id.watch( <em>parameters</em> )</h3></dt>
@@ -35,6 +40,7 @@ layout: default
         <strong>Optional Parameters:</strong>
         <dl>
             <dt>
+                <span class="label label-danger">Not Implemented</span>
                 <strong><code>onready</code></strong>:
                 <code><strong>function ()</strong> { … }</code>
             </dt>
@@ -46,13 +52,22 @@ layout: default
 
         <strong>Visual Customization (Optional):</strong>
         <dl>
-            <dt><strong><code>siteName</code></strong>: <strong>String</strong> (Freeform text)</dt>
+            <dt>
+              <span class="label label-danger">Not Implemented</span>
+              <strong><code>siteName</code></strong>: <strong>String</strong> (Freeform text)
+            </dt>
             <dd>Human-friendly name of the Relying Party.</dd>
 
-            <dt><strong><code>siteLogo</code></strong>: <strong>String</strong> (URL, absolute path, or <code>data:</code> URI)</dt>
+            <dt>
+              <span class="label label-danger">Not Implemented</span>
+              <strong><code>siteLogo</code></strong>: <strong>String</strong> (URL, absolute path, or <code>data:</code> URI)
+            </dt>
             <dd>Image that represents the Relying Party.</dd>
 
-            <dt><strong><code>backgroundColor</code></strong>: <strong>String</strong> (Hex #rgb or #rrggbb)</dt>
+            <dt>
+              <span class="label label-danger">Not Implemented</span>
+              <strong><code>backgroundColor</code></strong>: <strong>String</strong> (Hex #rgb or #rrggbb)
+            </dt>
             <dd>Background color for displaying Relying Party information.</dd>
         </dl>
     </dd>
@@ -72,7 +87,10 @@ layout: default
         </blockquote>
         <strong>Behavior Customization (Optional):</strong>
         <dl>
-            <dt><strong><code>email</code></strong>: <strong>String</strong> (Email address)</dt>
+            <dt>
+              <span class="label label-danger">Not Implemented</span>
+              <strong><code>email</code></strong>: <strong>String</strong> (Email address)
+            </dt>
             <dd>Skip address selection and attempt to authenticate the user as the given email address.</dd>
 
             <dt><strong><code>oncancel</code></strong>: <code><strong>function ()</strong> { … }</code></dt>
